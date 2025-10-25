@@ -16,5 +16,6 @@ if (global.start_hovered) {
 
 // Main sprite (dimmed/brightened)
 draw_set_color(draw_col);
-draw_sprite_ext(sprite_index, image_index, x, y, scale, scale, 0, draw_col, 1);
+var alpha = 0.7 + 0.3 * t; // fades to 70% when small
+draw_sprite_ext(sprite_index, image_index, x, y, scale, scale, 0, draw_col, alpha);
 draw_set_color(c_white);

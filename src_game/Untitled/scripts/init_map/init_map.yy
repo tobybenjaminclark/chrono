@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"init_map",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"init_map",
+  "parent":{
+    "name":"networking",
+    "path":"folders/Scripts/networking.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
