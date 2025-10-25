@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fmt;
 
 use std::hash::{Hash, Hasher};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
 pub struct Place {
@@ -63,15 +64,26 @@ impl fmt::Display for Map {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Faction {
+    #[serde(rename = "g")]
     Gnomes,
+    #[serde(rename = "t")]
     Trolls,
+    #[serde(rename = "c")]
     Centaurs,
 }
 
 
-
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Event {
     pub ownership: HashMap<Place, Faction>,
+}
+
+
+#[derive(Debug, Deserialize)]
+#[derive(Clone)]
+pub struct Character {
+    pub(crate) name: String,
+    pub(crate) faction: Faction,
 }

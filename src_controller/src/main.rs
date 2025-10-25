@@ -1,17 +1,14 @@
-mod gen_places;
-mod viz_places;
-mod types;
-mod cluster;
+mod generators;
 mod io;
-mod client;
+mod utils;
+mod visualisers;
+mod types;
 
-use std::env;
 use std::error::Error;
-use dotenvy::dotenv;
-use crate::cluster::cluster_locations;
-use crate::gen_places::fetch_map;
-use crate::io::{read_map_from_file, write_map_to_file};
-use crate::viz_places::viz_map;
+use crate::generators::gen_names::gen_characters;
+use crate::io::io::read_map_from_file;
+use crate::utils::cluster::cluster_locations;
+use crate::visualisers::viz_places::viz_map;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -30,7 +27,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let _ = write_map_to_file(&map, "map.json");*/
 
+
     let map = read_map_from_file("map.json").unwrap();
+    let characters = gen_characters();
+    for character in characters {
+        println!("name: {}. faction: {:?}", character.name, character.faction);
+    }
     let event = cluster_locations(&map);
 
     viz_map(&map, &event).unwrap();
