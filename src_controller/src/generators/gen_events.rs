@@ -35,20 +35,38 @@ pub fn gen_event(
     let before_event = existing_events.choose(&mut rng).unwrap();
     let mut before_list = vec![before_event.name.clone()];
 
+    let full_events: Vec<Event> = existing_events.clone(); // all previously added events
+
     // Add constraint and get interval
-    let constraints: Vec<(&str, &str)> = existing_events
+    let constraints: Vec<(&str, &str)> = full_events
         .iter()
-        .flat_map(|e| before_list.iter().map(move |b| (e.name.as_str(), b.as_str())))
+        .flat_map(|e| {
+            e.before
+                .iter()
+                .map(|b| (e.name.as_str(), b.as_str()))
+                .collect::<Vec<_>>()
+        })
         .collect();
 
 
 
-    let interval = add_constraint_and_get_interval(
+
+    println!("Existing constraints: {:?}", constraints);
+    println!("Trying to add event, before {:?}", before_event.name);
+
+    let interval = match add_constraint_and_get_interval(
         constraints,
-        (&*String::from("NEW_EVENT"), &*before_event.name.clone()),
+        ("NEW_EVENT", &before_event.name),
         "intervals.png",
-    )
-        .unwrap_or((0.0, 1.0));
+    ) {
+        Ok(i) => i,
+        Err(e) => {
+            eprintln!("⚠️ Failed to get interval for {}: {}", before_event.name, e);
+            (0.0, 1.0)
+        }
+    };
+
+
 
     // Determine characters affected
     let characters = if event_effects.contains(&"death".to_string()) && !existing_characters.is_empty() {
