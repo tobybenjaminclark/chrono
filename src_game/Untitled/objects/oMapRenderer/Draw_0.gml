@@ -1,2 +1,4 @@
 
-draw_map(global.map, room_width div 2, room_height div 2, global.map_radius);
+draw_map(global.map, map_x, map_y, global.map_radius * map_scale);
+
+draw_events_circle(map_x, map_y, global.map_radius * map_scale);
