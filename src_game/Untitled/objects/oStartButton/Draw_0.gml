@@ -1,5 +1,6 @@
 // Lighten colour when hovered
 var mix_col = merge_color(base_col, hover_col, glow_timer);
+var t = clamp((scale - base_scale) / (hover_scale - base_scale), 0, 1);
 
 // Subtle additive glow
 if (glow_timer > 0) {
@@ -10,5 +11,7 @@ if (glow_timer > 0) {
 
 // Draw main sprite
 draw_set_color(mix_col);
-draw_sprite_ext(sprite_index, image_index, x, y, scale, scale, 0, mix_col, 1);
+
+var alpha = 0.7 + 0.3 * t; // fades to 70% when small
+draw_sprite_ext(sprite_index, image_index, x, y, scale, scale, 0, mix_col, alpha);
 draw_set_color(c_white);
