@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"faction_font",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"faction_font",
+  "parent":{
+    "name":"time",
+    "path":"folders/Scripts/time.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
