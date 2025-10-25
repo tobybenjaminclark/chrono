@@ -230,7 +230,7 @@ pub async fn fetch_map(
         .collect();
 
     // Rotate normalized routes 90° counterclockwise
-    let rotated_routes: Vec<Vec<(f64, f64)>> = routes
+    let rotated_routes: Vec<Vec<(f64, f64)>> = routes.clone()
         .into_iter()
         .map(|route| {
             route
@@ -249,19 +249,53 @@ pub async fn fetch_map(
         })
         .collect();
 
-    let mirrored_routes: Vec<Vec<(f64, f64)>> = rotated_routes
+    // Normalize, rotate, mirror, and interpolate routes
+    let mirrored_routes: Vec<Vec<(f64, f64)>> = routes
         .into_iter()
         .map(|route| {
-            route
+            let normalized: Vec<(f64, f64)> = route
                 .into_iter()
-                .map(|(x, y)| (x, -y)) // mirror vertically
-                .collect()
+                .map(|(lat, lng)| ((lat - centroid.0) * scale, (lng - centroid.1) * scale))
+                .collect();
+
+            let rotated: Vec<(f64, f64)> = normalized
+                .into_iter()
+                .map(|(x, y)| (y, -x))
+                .collect();
+
+            let mirrored: Vec<(f64, f64)> = rotated
+                .into_iter()
+                .map(|(x, y)| (x, -y))
+                .collect();
+
+            interpolate_points(&mirrored, 10)
         })
         .collect();
+
 
     Ok(Map {
         locations: mirrored_locations,
         routes: mirrored_routes,
     })
 
+}
+
+// Helper function to downsample a polyline
+fn interpolate_points(points: &[(f64, f64)], n: usize) -> Vec<(f64, f64)> {
+    if points.is_empty() {
+        return Vec::new();
+    }
+
+    let mut result = Vec::new();
+    result.push(points[0]); // always include start point
+
+    for i in (1..points.len() - 1).step_by(n) {
+        result.push(points[i]);
+    }
+
+    if points.len() > 1 {
+        result.push(points[points.len() - 1]); // always include end point
+    }
+
+    result
 }
