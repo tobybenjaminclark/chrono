@@ -25,6 +25,7 @@
   ],
   "ResourceOrderSettings":[
     {"name":"fnt_centaur","order":2,"path":"fonts/fnt_centaur/fnt_centaur.yy",},
+    {"name":"fnt_title","order":3,"path":"fonts/fnt_title/fnt_title.yy",},
     {"name":"fnt_troll","order":1,"path":"fonts/fnt_troll/fnt_troll.yy",},
     {"name":"oClient","order":5,"path":"objects/oClient/oClient.yy",},
     {"name":"oMenuWizard","order":1,"path":"objects/oMenuWizard/oMenuWizard.yy",},
