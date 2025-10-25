@@ -1,1 +1,1 @@
-room_goto(rm_game);
+fade_to_room(rm_game);
