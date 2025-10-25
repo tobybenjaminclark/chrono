@@ -1,3 +1,5 @@
+if (room != rm_game) exit;
+
 var t = global.VIEWTIME;
 
 // Map t ∈ [0,1] to an angle in degrees

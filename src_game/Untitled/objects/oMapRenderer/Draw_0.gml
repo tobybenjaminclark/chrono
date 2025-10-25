@@ -1,3 +1,4 @@
+if (room != rm_game) exit;
 
 draw_map(global.map, map_x, map_y, global.map_radius * map_scale);
 
