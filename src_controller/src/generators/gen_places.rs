@@ -160,13 +160,12 @@ pub async fn fetch_map(
         return Err("No locations found".into());
     }
 
-    // Compute centroid
+    // Step 3: Compute centroid & scale for normalization
     let (sum_lat, sum_lng) = locations.iter().fold((0.0, 0.0), |acc, loc| {
         (acc.0 + loc.location.0, acc.1 + loc.location.1)
     });
     let centroid = (sum_lat / locations.len() as f64, sum_lng / locations.len() as f64);
 
-    // Compute max distance from centroid
     let max_dist = locations
         .iter()
         .map(|loc| {
@@ -175,28 +174,12 @@ pub async fn fetch_map(
             (dx * dx + dy * dy).sqrt()
         })
         .fold(0.0, f64::max)
-        .max(1e-9); // avoid division by zero
+        .max(1e-9);
 
-    // Scale factor so farthest point is at, say, 90% of the circle radius
     let scale = 0.9 / max_dist;
 
-    // Normalize locations to inside the circle
-    let normalized_locations: Vec<Place> = locations
-        .iter()
-        .map(|loc| {
-            let dx = loc.location.0 - centroid.0;
-            let dy = loc.location.1 - centroid.1;
-            Place {
-                name: loc.name.clone(),
-                location: (dx * scale, dy * scale),
-            }
-        })
-        .collect();
-
-    // Normalize routes the same way
-    let mut routes = Vec::new();
-
-    // inside the for loop over locations
+    // Step 4: Fetch routes
+    let mut routes: Vec<Vec<(f64, f64)>> = Vec::new();
     for i in 0..locations.len().saturating_sub(1) {
         let origin = locations[i].location;
         let dest = locations[i + 1].location;
@@ -208,77 +191,42 @@ pub async fn fetch_map(
         let dir_res: DirectionsResponse = client.get(&directions_url).send().await?.json().await?;
         if let Some(route) = dir_res.routes.get(0) {
             let decoded = decode_polyline(&route.overview_polyline.points);
-
-            // Normalize points
-            let normalized: Vec<(f64, f64)> = decoded
-                .iter()
-                .map(|&(lat, lng)| ((lat - centroid.0) * scale, (lng - centroid.1) * scale))
-                .collect();
-
-            routes.push(normalized);
+            routes.push(decoded);
         }
     }
 
+    // Step 5: Unified transform function
+    let transform_point = |(lat, lng): (f64, f64)| {
+        let x = (lat - centroid.0) * scale;
+        let y = (lng - centroid.1) * scale;
+        let (x, y) = (y, -x); // rotate 90° CCW
+        (x, -y)             // mirror vertically
+    };
 
-    // Rotate normalized locations 90° counterclockwise
-    let rotated_locations: Vec<Place> = normalized_locations
+    // Transform locations
+    let transformed_locations: Vec<Place> = locations
         .into_iter()
         .map(|loc| Place {
             name: loc.name,
-            location: (loc.location.1, -loc.location.0), // rotate 90° left
+            location: transform_point(loc.location),
         })
         .collect();
 
-    // Rotate normalized routes 90° counterclockwise
-    let rotated_routes: Vec<Vec<(f64, f64)>> = routes.clone()
+    // Transform routes
+    let transformed_routes: Vec<Vec<(f64, f64)>> = routes
         .into_iter()
         .map(|route| {
-            route
-                .into_iter()
-                .map(|(x, y)| (y, -x)) // rotate 90° left
-                .collect()
+            let transformed: Vec<(f64, f64)> = route.into_iter().map(transform_point).collect();
+            interpolate_points(&transformed, 10)
         })
         .collect();
-
-    // Mirror vertically after rotation
-    let mirrored_locations: Vec<Place> = rotated_locations
-        .into_iter()
-        .map(|loc| Place {
-            name: loc.name,
-            location: (loc.location.0, -loc.location.1), // mirror vertically
-        })
-        .collect();
-
-    // Normalize, rotate, mirror, and interpolate routes
-    let mirrored_routes: Vec<Vec<(f64, f64)>> = routes
-        .into_iter()
-        .map(|route| {
-            let normalized: Vec<(f64, f64)> = route
-                .into_iter()
-                .map(|(lat, lng)| ((lat - centroid.0) * scale, (lng - centroid.1) * scale))
-                .collect();
-
-            let rotated: Vec<(f64, f64)> = normalized
-                .into_iter()
-                .map(|(x, y)| (y, -x))
-                .collect();
-
-            let mirrored: Vec<(f64, f64)> = rotated
-                .into_iter()
-                .map(|(x, y)| (x, -y))
-                .collect();
-
-            interpolate_points(&mirrored, 10)
-        })
-        .collect();
-
 
     Ok(Map {
-        locations: mirrored_locations,
-        routes: mirrored_routes,
+        locations: transformed_locations,
+        routes: transformed_routes,
     })
-
 }
+
 
 // Helper function to downsample a polyline
 fn interpolate_points(points: &[(f64, f64)], n: usize) -> Vec<(f64, f64)> {
