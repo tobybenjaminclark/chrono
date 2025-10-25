@@ -31,6 +31,7 @@
     {"name":"oTimeSlider","order":1,"path":"objects/oTimeSlider/oTimeSlider.yy",},
     {"name":"rm_mainmenu","order":1,"path":"rooms/rm_mainmenu/rm_mainmenu.yy",},
     {"name":"character_render","order":1,"path":"scripts/character_render/character_render.yy",},
+    {"name":"event_list","order":2,"path":"scripts/event_list/event_list.yy",},
     {"name":"event_render","order":1,"path":"scripts/event_render/event_render.yy",},
     {"name":"faction_font","order":2,"path":"scripts/faction_font/faction_font.yy",},
     {"name":"faction_sprite","order":1,"path":"scripts/faction_sprite/faction_sprite.yy",},

@@ -54,6 +54,7 @@
     {"id":{"name":"rm_mainmenu","path":"rooms/rm_mainmenu/rm_mainmenu.yy",},},
     {"id":{"name":"character_render","path":"scripts/character_render/character_render.yy",},},
     {"id":{"name":"character","path":"scripts/character/character.yy",},},
+    {"id":{"name":"event_list","path":"scripts/event_list/event_list.yy",},},
     {"id":{"name":"event_render","path":"scripts/event_render/event_render.yy",},},
     {"id":{"name":"event","path":"scripts/event/event.yy",},},
     {"id":{"name":"faction_font","path":"scripts/faction_font/faction_font.yy",},},
