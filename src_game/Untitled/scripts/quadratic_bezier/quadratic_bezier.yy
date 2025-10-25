@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"quadratic_bezier",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"quadratic_bezier",
+  "parent":{
+    "name":"geo",
+    "path":"folders/Scripts/geo.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

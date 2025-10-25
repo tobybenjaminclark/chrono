@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"road_drawer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"road_drawer",
+  "parent":{
+    "name":"geo",
+    "path":"folders/Scripts/geo.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
