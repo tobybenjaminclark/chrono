@@ -81,9 +81,17 @@ pub struct Event {
 }
 
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[derive(Clone)]
 pub struct Character {
     pub(crate) name: String,
     pub(crate) faction: Faction,
+}
+
+pub fn ownership_to_json_map(event: &Event) -> HashMap<String, Faction> {
+    let mut map = HashMap::new();
+    for (place, faction) in &event.ownership {
+        map.insert(place.clone().name, *faction);
+    }
+    map
 }
