@@ -5,12 +5,27 @@ mod visualisers;
 mod types;
 mod endpoints;
 
+mod interval;
+
 use std::error::Error;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use crate::interval::plot::plot_intervals;
 use crate::io::client::handle_client;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let constraints = vec![
+        ("A", "C"),
+        ("A", "D"),
+        ("B", "C"),
+        ("B", "D"),
+        ("C", "D"),
+    ];
+
+
+    plot_intervals(constraints, "intervals.png")?;
+
+
     init_connection().await;
     Ok(())
 }
