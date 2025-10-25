@@ -53,6 +53,9 @@ pub async fn init_map(name: String, live: bool) -> String {
 
 
 pub fn generate_start_events() -> Vec<Event> {
-    todo!()
+    // read array from start_events.json
+    // each array is a list of three Event objects
+    // pick a random one and return it
 
+    todo!()
 }
