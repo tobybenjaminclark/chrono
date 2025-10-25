@@ -3,3 +3,4 @@ global.DEBUG_ENABLED = true;
 global.map_radius = 400;
 global.events = [];
 global.start_hovered = false;
+global.is_connected = false;

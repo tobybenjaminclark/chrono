@@ -46,7 +46,7 @@ impl fmt::Display for Map {
             writeln!(f, "  {}. {}", i + 1, place)?;
         }
         writeln!(f, "Routes: {}", self.routes.len())?;
-        for (i, route) in self.routes.iter().enumerate() {
+        for (i, rout qe) in self.routes.iter().enumerate() {
             // Take first 5 points or fewer
             let first_points: Vec<String> = route.iter()
                 .take(5)
