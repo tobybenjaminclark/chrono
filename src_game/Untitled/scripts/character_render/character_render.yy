@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"character_render",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"character_render",
+  "parent":{
+    "name":"characters",
+    "path":"folders/Scripts/characters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

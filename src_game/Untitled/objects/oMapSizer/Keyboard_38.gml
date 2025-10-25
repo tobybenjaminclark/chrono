@@ -1,1 +1,0 @@
-global.map_radius += 0.5;

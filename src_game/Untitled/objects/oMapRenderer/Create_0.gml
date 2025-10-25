@@ -1,7 +1,7 @@
 if !variable_global_exists("map") { init_default_map(); }
 if !variable_global_exists("events") { init_default_events(); }
 if array_length(global.events) == 0 { init_default_events(); }
-
+if !variable_global_exists("characters") { init_default_characters(); }
 
 // oMapController: Create Event
 map_x = room_width / 2;          // always centered horizontally
