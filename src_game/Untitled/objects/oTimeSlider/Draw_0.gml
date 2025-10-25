@@ -14,4 +14,4 @@ draw_circle(px, py, 8, false);
 
 // Draw t value (0–1)
 draw_set_color(c_white);
-draw_text(px + 12, py - 8, string_format(t, 0, 2));
+draw_text(px + 12, py - 8, string_format(global.VIEWTIME, 0, 2));
