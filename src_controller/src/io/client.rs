@@ -1,6 +1,7 @@
 use std::io::{Read, Write};
-use std::net::{TcpListener, TcpStream};
-use std::thread;
+use std::net::TcpStream;
+use serde_json::Value;
+use crate::init_map; // make sure your init_map function takes a name
 
 pub fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0u8; 512];
@@ -12,13 +13,53 @@ pub fn handle_client(mut stream: TcpStream) {
                 break;
             }
             Ok(n) => {
-                let received = String::from_utf8_lossy(&buffer[..n]);
-                println!("Received from {}: {}", stream.peer_addr().unwrap(), received);
+                let raw_bytes = &buffer[..n];
+                let raw_str = String::from_utf8_lossy(raw_bytes);
 
-                // Echo the message back to the client
-                if let Err(e) = stream.write_all(received.as_bytes()) {
-                    eprintln!("Failed to send response: {}", e);
-                    break;
+                // Extract JSON from first '{' to last '}'
+                if let (Some(start), Some(end)) = (raw_str.find('{'), raw_str.rfind('}')) {
+                    if start < end {
+                        let json_str = &raw_str[start..=end];
+                        println!("Extracted JSON: {}", json_str);
+
+                        match serde_json::from_str::<Value>(json_str) {
+                            Ok(parsed_json) => {
+                                println!("Parsed JSON: {}", parsed_json);
+
+                                // Check if INIT_MAP exists
+                                if let Some(init_map_obj) = parsed_json.get("INIT_MAP") {
+                                    // Extract name (optional handling)
+                                    let name = init_map_obj.get("name")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("default");
+
+                                    println!("INIT_MAP requested for name: {}", name);
+
+                                    // Call init_map with the name
+                                    let response_json = init_map(name.parse().unwrap());
+
+                                    // Send the JSON back to the client
+                                    if let Err(e) = stream.write_all(response_json.as_bytes()) {
+                                        eprintln!("Failed to send INIT_MAP response: {}", e);
+                                        break;
+                                    }
+
+                                    continue; // skip echoing original message
+                                }
+                            }
+                            Err(e) => println!("Failed to parse JSON: {}, error: {}", json_str, e),
+                        }
+
+                        // Echo back the cleaned JSON if INIT_MAP wasn't present
+                        if let Err(e) = stream.write_all(json_str.as_bytes()) {
+                            eprintln!("Failed to send response: {}", e);
+                            break;
+                        }
+                    } else {
+                        println!("No valid JSON found in message");
+                    }
+                } else {
+                    println!("No JSON braces found in message");
                 }
             }
             Err(e) => {
