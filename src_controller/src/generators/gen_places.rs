@@ -242,9 +242,48 @@ pub async fn fetch_map(
     }
 
 
+    // Rotate normalized locations 90° counterclockwise
+    let rotated_locations: Vec<Place> = normalized_locations
+        .into_iter()
+        .map(|loc| Place {
+            name: loc.name,
+            location: (loc.location.1, -loc.location.0), // rotate 90° left
+        })
+        .collect();
+
+    // Rotate normalized routes 90° counterclockwise
+    let rotated_routes: Vec<Vec<(f64, f64)>> = routes
+        .into_iter()
+        .map(|route| {
+            route
+                .into_iter()
+                .map(|(x, y)| (y, -x)) // rotate 90° left
+                .collect()
+        })
+        .collect();
+
+    // Mirror vertically after rotation
+    let mirrored_locations: Vec<Place> = rotated_locations
+        .into_iter()
+        .map(|loc| Place {
+            name: loc.name,
+            location: (loc.location.0, -loc.location.1), // mirror vertically
+        })
+        .collect();
+
+    let mirrored_routes: Vec<Vec<(f64, f64)>> = rotated_routes
+        .into_iter()
+        .map(|route| {
+            route
+                .into_iter()
+                .map(|(x, y)| (x, -y)) // mirror vertically
+                .collect()
+        })
+        .collect();
 
     Ok(Map {
-        locations: normalized_locations,
-        routes,
+        locations: mirrored_locations,
+        routes: mirrored_routes,
     })
+
 }
