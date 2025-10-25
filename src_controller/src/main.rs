@@ -5,39 +5,43 @@ mod visualisers;
 mod types;
 
 use std::error::Error;
-use std::net::TcpListener;
-use std::thread;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
+use std::{env, thread};
+use dotenvy::dotenv;
 use serde_json::json;
 use crate::generators::gen_names::gen_characters;
+use crate::generators::gen_places::fetch_map;
 use crate::io::client::handle_client;
-use crate::io::io::read_map_from_file;
+use crate::io::io::{read_map_from_file, write_map_to_file};
 use crate::types::ownership_to_json_map;
 use crate::utils::cluster::cluster_locations;
 use crate::visualisers::viz_places::viz_map;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    init_connection();
+    init_connection().await;
     Ok(())
 }
 
-pub fn init_map(name: String) -> String {
-    /*dotenv().ok();
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 3 {
-        eprintln!("Usage: cargo run -- <PLACE_NAME> <NUMBER_OF_RESULTS>");
-        std::process::exit(1);
-    }
-    let place = &args[1];
-    let n: usize = args[2].parse()?;
-    println!("Fetching up to {} attractions in {}...", n, place);
-    // Destructure the returned tuple
-    let map = fetch_map(place, n, 200.0).await?;
-    println!("{}", map);
+pub async fn init_map(name: String, live: bool) -> String {
 
-    let _ = write_map_to_file(&map, "map.json");*/
+    let map = {
+        if live {
+            dotenv().ok();
+            println!("Fetching up to {} attractions in {}...", 10, name);
+            // Destructure the returned tuple
+            let map = fetch_map(&*name, 10, 200.0).await.unwrap();
+            println!("{}", map);
 
-    let map = read_map_from_file("map.json").unwrap();
+            let _ = write_map_to_file(&map, "map.json");
+
+            map
+        }
+        else {
+            read_map_from_file("map.json").unwrap()
+        }
+    };
     let characters = gen_characters();
     for character in &characters {
         println!("name: {}. faction: {:?}", character.name, character.faction);
@@ -63,21 +67,21 @@ pub fn init_map(name: String) -> String {
 
 }
 
-pub fn init_connection() {
-    let port = "9999"; // You can change this
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
-        .expect("Failed to bind to localhost");
+pub async fn init_connection() {
+    let port = "9999";
+    let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{}", port))
+        .await
+        .expect("Failed to bind to port");
 
     println!("Server listening on localhost:{}", port);
 
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                println!("New connection from {}", stream.peer_addr().unwrap());
-                // Handle each client in a separate thread
-                thread::spawn(|| handle_client(stream));
+    loop {
+        match listener.accept().await {
+            Ok((stream, addr)) => {
+                println!("New connection from {}", addr);
+                tokio::spawn(handle_client(stream));
             }
-            Err(e) => eprintln!("Connection failed: {}", e),
+            Err(e) => eprintln!("Failed to accept connection: {}", e),
         }
     }
 }
