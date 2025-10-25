@@ -1,7 +1,9 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
-use serde_json::Value;
+use serde_json::{json, Value};
 use crate::endpoints::init_map;
+use crate::generators::gen_events::gen_event;
+use crate::types::{Character, Event};
 
 pub async fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0u8; 512];
@@ -37,6 +39,44 @@ pub async fn handle_client(mut stream: TcpStream) {
                                     let response_json = init_map(name.to_string(), true).await;
 
                                     if let Err(e) = stream.write_all(response_json.as_bytes()).await {
+                                        eprintln!("Failed to send INIT_MAP response: {}", e);
+                                        break;
+                                    }
+
+                                    continue;
+                                }
+                                else if let Some(gen_events_obj) = parsed_json.get("GEN_EVENTS") {
+                                    let n = gen_events_obj.get("n")
+                                        .and_then(|v| v.as_i64())
+                                        .unwrap_or(0);
+
+                                    let events: Vec<Event> = gen_events_obj
+                                        .get("events")
+                                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                                        .unwrap_or_else(|| vec![]);
+
+                                    let characters: Vec<Character> = gen_events_obj
+                                        .get("characters")
+                                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                                        .unwrap_or_else(|| vec![]);
+
+                                    println!("GEN_EVENTS requested for: {} events", n);
+
+                                    let mut new_events = Vec::new();
+
+                                    for _ in 0..n {
+                                        let e = gen_event(events.clone(), characters.clone());
+                                        new_events.push(e);
+                                    }
+
+                                    let response = json!({
+                                        "GEN_EVENTS": {
+                                            "events": new_events,
+                                        }
+                                    }).to_string();
+
+
+                                    if let Err(e) = stream.write_all(response.as_bytes()).await {
                                         eprintln!("Failed to send INIT_MAP response: {}", e);
                                         break;
                                     }
