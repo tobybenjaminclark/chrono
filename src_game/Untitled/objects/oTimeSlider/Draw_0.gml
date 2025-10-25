@@ -4,16 +4,10 @@
 var angle = 135 + (270 * t);
 var rad   = degtorad(angle);
 
-var r = global.map_radius;
-with (oMapRenderer) {
-	r = map_scale * global.map_radius;
-	center_x = map_x;
-	center_y = map_y;
-}
 
 // Compute position on circle
-var px = center_x + r * cos(rad);
-var py = center_y + r * sin(rad);
+var px = center_x + radius * cos(rad);
+var py = center_y + radius * sin(rad);
 
 // Draw the knob
 draw_set_color(c_white);

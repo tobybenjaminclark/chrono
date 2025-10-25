@@ -217,7 +217,7 @@ pub async fn fetch_map(
         .into_iter()
         .map(|route| {
             let transformed: Vec<(f64, f64)> = route.into_iter().map(transform_point).collect();
-            interpolate_points(&transformed, 10)
+            interpolate_points(&transformed, 4)
         })
         .collect();
 
