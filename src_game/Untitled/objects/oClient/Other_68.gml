@@ -18,7 +18,7 @@ switch (t)
 
         if (variable_struct_exists(jsonData, "INIT_MAP"))
         {
-            handleInitMap(jsonData.INIT_MAP);
+            handle_init_map(jsonData.INIT_MAP);
         }
 
         show_debug_message(jsonData);

@@ -87,7 +87,7 @@ function draw_map(_map, _x, _y, _r)
 	    // --- Draw scaled sprite ---
 	    var spr_w = sprite_get_width(spr);
 	    var spr_h = sprite_get_height(spr);
-	    var scale = 0.25;
+	    var scale = 0.15;
 
 	    draw_sprite_ext(
 	        spr, 0,

@@ -5,7 +5,7 @@ if (!global.is_connected) exit; // nothing to do if already offline
 if (!variable_global_exists("ping_timer")) global.ping_timer = 0;
 global.ping_timer += delta_time / 1000000; // convert µs → seconds
 
-if (global.ping_timer > 1) // every ~1 second
+if (global.ping_timer > 2) // every ~1 second
 {
     global.ping_timer = 0;
 

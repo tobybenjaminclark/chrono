@@ -2,7 +2,7 @@
 /// @desc Draws a thick road segment with an outline.
 function draw_road(x1, y1, x2, y2)
 {
-    var width       = 10;         // inner road width
+    var width       = 3;         // inner road width
     var outline_col = make_color_rgb(255, 255, 255);
     var road_col    = make_color_rgb(150, 150, 150);
     var outline_w   = width + 4;  // total width including outline
