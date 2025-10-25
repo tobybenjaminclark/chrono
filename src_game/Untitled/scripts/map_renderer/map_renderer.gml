@@ -10,9 +10,12 @@ function draw_map(_map, _x, _y, _r)
     var r  = _r;
 
     // --- Draw boundary circle (unit radius) ---
-    draw_set_color(make_color_rgb(60, 60, 60));
+    draw_set_color(make_color_rgb(30, 30, 30));
     draw_set_circle_precision(32);
+	draw_circle(cx, cy, r, true);
+	draw_set_alpha(0.5);
     draw_circle(cx, cy, r, false);
+	draw_set_alpha(1);
 
     // --- Draw routes (roads) ---
     var routes = _map.routes;
