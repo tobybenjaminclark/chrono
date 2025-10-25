@@ -20,6 +20,7 @@ pub async fn handle_client(mut stream: TcpStream) {
                 if let (Some(start), Some(end)) = (raw_str.find('{'), raw_str.rfind('}')) {
                     if start < end {
                         let json_str = raw_str[start..=end].trim_end_matches(|c: char| !c.is_ascii_graphic());
+
                         println!("Extracted JSON: {}", json_str);
 
                         match serde_json::from_str::<Value>(json_str) {

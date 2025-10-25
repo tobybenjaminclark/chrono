@@ -1,0 +1,71 @@
+[
+  [
+    {
+      "name": "The Great Cheese Fair",
+      "description": "I can't wait to eat some cheese! I want the cheese fair to happen before the grand ball",
+      "before": ["The Grand Ball"],
+      "start": 0.66666,
+      "end": 1.0
+    },
+    {
+      "name": "The Grand Ball",
+      "description": "The grand ball must be splendid! I wish it to take place before the harvest festival",
+      "before": ["The Harvest Festival"],
+      "start": 0.33333,
+      "end": 0.66666
+    },
+    {
+      "name": "The Harvest Festival",
+      "description": "All the villagers will rejoice! Let the harvest festival occur before anything else",
+      "before": [],
+      "start": 0.0,
+      "end": 0.33333
+    }
+  ],
+  [
+    {
+      "name": "The Jousting Tournament",
+      "description": "I can't wait to see the knights clash! Let the tournament be held before the midsummer feast",
+      "before": ["The Midsummer Feast"],
+      "start": 0.66666,
+      "end": 1.0
+    },
+    {
+      "name": "The Midsummer Feast",
+      "description": "The feast will be grand! I wish it to happen before the royal parade",
+      "before": ["The Royal Parade"],
+      "start": 0.33333,
+      "end": 0.66666
+    },
+    {
+      "name": "The Royal Parade",
+      "description": "The kingdom will celebrate! Make the royal parade occur before any other event",
+      "before": [],
+      "start": 0.0,
+      "end": 0.33333
+    }
+  ],
+  [
+    {
+      "name": "The Dragon Hunt",
+      "description": "I hope the dragon hunt is thrilling! I want it to happen before the lantern festival",
+      "before": ["The Lantern Festival"],
+      "start": 0.66666,
+      "end": 1.0
+    },
+    {
+      "name": "The Lantern Festival",
+      "description": "The lanterns will shine bright! Schedule it before the king's banquet",
+      "before": ["The King's Banquet"],
+      "start": 0.33333,
+      "end": 0.66666
+    },
+    {
+      "name": "The King's Banquet",
+      "description": "The nobles will feast! Let the king's banquet occur before all else",
+      "before": [],
+      "start": 0.0,
+      "end": 0.33333
+    }
+  ]
+]
