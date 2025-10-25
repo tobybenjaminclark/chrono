@@ -1,7 +1,7 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use serde_json::Value;
-use crate::init_map;
+use crate::endpoints::init_map;
 
 pub async fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0u8; 512];

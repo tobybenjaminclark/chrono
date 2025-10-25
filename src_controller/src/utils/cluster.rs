@@ -1,5 +1,5 @@
 use std::cmp::PartialEq;
-use crate::types::{Event, Faction, Map, Place};
+use crate::types::{Event, Faction, Map, Ownership, Place};
 use std::collections::HashMap;
 use rand::prelude::IndexedRandom;
 
@@ -9,7 +9,7 @@ fn dist2(a: (f64, f64), b: (f64, f64)) -> f64 {
     let dy = a.1 - b.1;
     dx * dx + dy * dy
 }
-pub fn cluster_locations(map: &Map) -> Event {
+pub fn cluster_locations(map: &Map) -> Ownership {
     let factions = [Faction::Gnomes, Faction::Trolls, Faction::Centaurs];
     let k = factions.len();
     let max_per_cluster = (map.locations.len() as f64 / k as f64).ceil() as usize;
@@ -82,8 +82,5 @@ pub fn cluster_locations(map: &Map) -> Event {
             final_ownership.insert(place.clone(), *faction);
         }
     }
-
-    Event {
-        ownership: final_ownership
-    }
+    final_ownership
 }

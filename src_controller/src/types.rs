@@ -65,7 +65,7 @@ impl fmt::Display for Map {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub enum Faction {
+pub(crate) enum Faction {
     #[serde(rename = "g")]
     Gnomes,
     #[serde(rename = "t")]
@@ -77,8 +77,14 @@ pub enum Faction {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Event {
-    pub ownership: HashMap<Place, Faction>,
+    pub name: String,
+    pub description: String,
+    pub before: Vec<String>,
+    pub start: f64,
+    pub end: f64
 }
+
+pub type Ownership = HashMap<Place, Faction>;
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -88,9 +94,9 @@ pub struct Character {
     pub(crate) faction: Faction,
 }
 
-pub fn ownership_to_json_map(event: &Event) -> HashMap<String, Faction> {
+pub fn ownership_to_json_map(ownership: Ownership) -> HashMap<String, Faction> {
     let mut map = HashMap::new();
-    for (place, faction) in &event.ownership {
+    for (place, faction) in &ownership {
         map.insert(place.clone().name, *faction);
     }
     map

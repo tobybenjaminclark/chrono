@@ -1,9 +1,9 @@
 use plotters::prelude::*;
 use std::error::Error;
 use std::f64::consts::PI;
-use crate::types::{Map, Event, Faction};
+use crate::types::{Map, Event, Faction, Ownership};
 
-pub fn viz_map(map: &Map, event: &Event) -> Result<(), Box<dyn Error>> {
+pub fn viz_map(map: &Map, ownership: &Ownership) -> Result<(), Box<dyn Error>> {
     // Create drawing area
     let root = BitMapBackend::new("map.png", (800, 800)).into_drawing_area();
     root.fill(&WHITE)?;
@@ -38,7 +38,7 @@ pub fn viz_map(map: &Map, event: &Event) -> Result<(), Box<dyn Error>> {
 
     // --- Plot locations colored by faction ---
     for place in &map.locations {
-        if let Some(faction) = event.ownership.get(place) {
+        if let Some(faction) = ownership.get(place) {
             chart.draw_series(PointSeries::of_element(
                 vec![place.location],
                 8,
