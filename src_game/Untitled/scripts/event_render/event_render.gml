@@ -26,43 +26,53 @@ function draw_event_arc(cx, cy, r, start_angle, end_angle, thickness, color)
     }
 }
 
-
-/// @function draw_events_circle()
-/// @desc Draws all global.events as circular tracks around the map.
+/// @function draw_events_circle(_x, _y, _r_scale)
+/// @desc Draws all global.events as circular tracks around the map position.
 ///       Time runs 0–1 from 135° → 405° clockwise (over the top).
 ///       Highlights events intersecting global.VIEWTIME.
-
-function draw_events_circle()
+function draw_events_circle(_x, _y, _r)
 {
-    if (!variable_global_exists("events")) exit;
+    // --- Safety checks ---
+    if (!variable_global_exists("events") || is_undefined(global.events)) exit;
+    if (!variable_global_exists("map_radius") || is_undefined(global.map_radius)) exit;
+    if (!variable_global_exists("VIEWTIME") || is_undefined(global.VIEWTIME)) exit;
 
-    var cx = room_width  div 2;
-    var cy = room_height div 2;
-    var base_r = global.map_radius + 10;
+    var cx = _x;
+    var cy = _y;
+    var r  = _r;
 
+    var base_r = r + 10;
     var tview = clamp(global.VIEWTIME, 0, 1);
 
-    for (var i = 0; i < array_length(global.events); i++)
+    var evs = global.events;
+    var ev_count = array_length(evs);
+    if (ev_count == 0) exit;
+
+    // --- Draw each event arc ---
+    for (var i = 0; i < ev_count; i++)
     {
-        var ev = global.events[i];
-        var r  = base_r + (ev.track * 10);
+        var ev = evs[i];
+        if (!is_struct(ev) || !variable_struct_exists(ev, "start_time")) continue;
+
+        var track_offset = (ev.track * 10);
+        var rr = base_r + track_offset;
 
         var active = (tview >= ev.start_time) && (tview <= ev.end_time);
         var col = active ? c_yellow : c_white;
-        var thickness = active ? 4 : 2;
+        var thickness = (active ? 4 : 2);
 
-        // Convert to radians
+        // Convert to radians (135°–405° = top arc)
         var start_angle = degtorad(135 + (ev.start_time * 270));
         var end_angle   = degtorad(135 + (ev.end_time   * 270));
 
-        // ✅ draw the arc
-        draw_event_arc(cx, cy, r, start_angle, end_angle, thickness, col);
+        // --- Draw the arc ---
+        draw_event_arc(cx, cy, rr, start_angle, end_angle, thickness, col);
 
-        // Draw start/end markers
-        var x1 = cx + r * cos(start_angle);
-        var y1 = cy + r * sin(start_angle);
-        var x2 = cx + r * cos(end_angle);
-        var y2 = cy + r * sin(end_angle);
+        // --- Draw start/end markers ---
+        var x1 = cx + rr * cos(start_angle);
+        var y1 = cy + rr * sin(start_angle);
+        var x2 = cx + rr * cos(end_angle);
+        var y2 = cy + rr * sin(end_angle);
 
         draw_set_color(active ? c_yellow : c_red);
         draw_circle(x1, y1, 2, false);
