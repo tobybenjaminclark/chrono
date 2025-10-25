@@ -4,8 +4,8 @@ if array_length(global.events) == 0 { init_default_events(); }
 if !variable_global_exists("characters") { init_default_characters(); }
 
 // oMapController: Create Event
-map_x = room_width / 2;          // always centered horizontally
-map_y = room_height / 2;         // starts middle
+map_x = room_width / 3 - 100;          // always centered horizontally
+map_y = room_height / 2 + 80;         // starts middle
 map_scale = 1;                   // normal size
 
 // targets (for animation)
