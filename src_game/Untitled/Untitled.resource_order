@@ -23,6 +23,7 @@
     {"name":"fnt_centaur","order":2,"path":"fonts/fnt_centaur/fnt_centaur.yy",},
     {"name":"fnt_troll","order":1,"path":"fonts/fnt_troll/fnt_troll.yy",},
     {"name":"oEventRenderer","order":2,"path":"objects/oEventRenderer/oEventRenderer.yy",},
+    {"name":"oMapSizer","order":3,"path":"objects/oMapSizer/oMapSizer.yy",},
     {"name":"oTimeSlider","order":1,"path":"objects/oTimeSlider/oTimeSlider.yy",},
     {"name":"event_render","order":1,"path":"scripts/event_render/event_render.yy",},
     {"name":"faction_font","order":2,"path":"scripts/faction_font/faction_font.yy",},

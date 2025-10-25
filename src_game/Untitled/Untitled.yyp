@@ -43,6 +43,7 @@
     {"id":{"name":"fnt_troll","path":"fonts/fnt_troll/fnt_troll.yy",},},
     {"id":{"name":"oEventRenderer","path":"objects/oEventRenderer/oEventRenderer.yy",},},
     {"id":{"name":"oMapRenderer","path":"objects/oMapRenderer/oMapRenderer.yy",},},
+    {"id":{"name":"oMapSizer","path":"objects/oMapSizer/oMapSizer.yy",},},
     {"id":{"name":"oTimeSlider","path":"objects/oTimeSlider/oTimeSlider.yy",},},
     {"id":{"name":"rm_game","path":"rooms/rm_game/rm_game.yy",},},
     {"id":{"name":"event_render","path":"scripts/event_render/event_render.yy",},},
