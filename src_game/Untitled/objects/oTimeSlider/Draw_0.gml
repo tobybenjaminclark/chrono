@@ -9,8 +9,10 @@ var px = center_x + global.map_radius * cos(rad);
 var py = center_y + global.map_radius * sin(rad);
 
 // Draw the knob
-draw_set_color(c_red);
-draw_circle(px, py, 8, false);
+draw_set_color(c_white);
+draw_circle(px, py, 5, false);
+draw_set_color(c_aqua);
+draw_circle(px, py, 3, false);
 
 // Draw t value (0–1)
 draw_set_color(c_white);
