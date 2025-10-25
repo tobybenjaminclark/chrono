@@ -215,29 +215,7 @@ pub async fn fetch_map(
                 .map(|&(lat, lng)| ((lat - centroid.0) * scale, (lng - centroid.1) * scale))
                 .collect();
 
-            // Resample to exactly 10 points
-            let n_points = normalized.len();
-            if n_points >= 2 {
-                let mut resampled = Vec::new();
-                for j in 0..10 {
-                    let t = j as f64 / 9.0; // 0..1
-                    let idx_f = t * (n_points - 1) as f64;
-                    let idx0 = idx_f.floor() as usize;
-                    let idx1 = idx_f.ceil() as usize;
-                    if idx0 == idx1 {
-                        resampled.push(normalized[idx0]);
-                    } else {
-                        let (x0, y0) = normalized[idx0];
-                        let (x1, y1) = normalized[idx1];
-                        let frac = idx_f - idx0 as f64;
-                        resampled.push((
-                            x0 + (x1 - x0) * frac,
-                            y0 + (y1 - y0) * frac,
-                        ));
-                    }
-                }
-                routes.push(resampled);
-            }
+            routes.push(normalized);
         }
     }
 
