@@ -68,4 +68,69 @@ function handle_init_map(data)
                 + string(places[i].loc.x) + ", " + string(places[i].loc.y) + ")");
         }
     }
+	
+	// You might also want to store the rest (map, ownership, characters, etc.)
+    if (variable_struct_exists(data, "events")) {
+        init_events_from_data(data.events);
+    }
+}
+
+/// @function init_events_from_data(_event_list)
+/// @desc Converts server event JSON into native Event() structs with track assignment.
+/// @param _event_list  Array of event objects from server JSON.
+function init_events_from_data(_event_list)
+{
+    if (is_undefined(_event_list) || !is_array(_event_list)) {
+        show_debug_message("[init_events_from_data] No event data found.");
+        return;
+    }
+
+    global.events = [];
+
+    // --- Assign tracks automatically to avoid overlap ---
+    var add_event = function(name, desc, start_time, end_time)
+    {
+        var track = 0;
+        var overlap = true;
+
+        while (overlap)
+        {
+            overlap = false;
+            for (var i = 0; i < array_length(global.events); i++)
+            {
+                var ev = global.events[i];
+                if (ev.track == track)
+                {
+                    if ((start_time < ev.end_time) && (end_time > ev.start_time))
+                    {
+                        overlap = true;
+                        break;
+                    }
+                }
+            }
+            if (overlap) track++;
+        }
+
+        var ev_struct = Event(track, start_time, end_time);
+        ev_struct.name        = name;
+        ev_struct.description = desc;
+
+        array_push(global.events, ev_struct);
+    };
+
+    // --- Parse server data ---
+    for (var i = 0; i < array_length(_event_list); i++)
+    {
+        var src = _event_list[i];
+        if (!is_struct(src)) continue;
+
+        var start_time = clamp(src.start, 0, 1);
+        var end_time   = clamp(src.end, 0, 1);
+        var name       = src.name;
+        var desc       = src.description;
+
+        add_event(name, desc, start_time, end_time);
+    }
+
+    show_debug_message("[init_events_from_data] Imported " + string(array_length(global.events)) + " events!");
 }
