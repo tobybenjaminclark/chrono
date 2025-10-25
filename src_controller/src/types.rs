@@ -77,12 +77,31 @@ pub(crate) enum Faction {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Event {
+    #[serde(default)]
     pub name: String,
+
+    #[serde(default)]
     pub description: String,
+
+    #[serde(default)]
     pub before: Vec<String>,
+
+    #[serde(default)]
     pub start: f64,
-    pub end: f64
+
+    #[serde(default)]
+    pub end: f64,
+
+    #[serde(default)]
+    pub _type: String,
+
+    #[serde(default)]
+    pub characters: Vec<Character>,
+
+    #[serde(default)]
+    pub effects: Vec<String>,
 }
+
 
 pub type Ownership = HashMap<Place, Faction>;
 

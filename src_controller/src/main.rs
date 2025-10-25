@@ -9,7 +9,7 @@ mod interval;
 
 use std::error::Error;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use crate::interval::plot::plot_intervals;
+use crate::interval::plot::{add_constraint_and_get_interval};
 use crate::io::client::handle_client;
 
 #[tokio::main]
@@ -19,11 +19,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         ("A", "D"),
         ("B", "C"),
         ("B", "D"),
-        ("C", "D"),
     ];
 
 
-    plot_intervals(constraints, "intervals.png")?;
+    add_constraint_and_get_interval(constraints, ("C", "D"), "intervals.png")?;
 
 
     init_connection().await;

@@ -1,45 +1,58 @@
 use petgraph::graph::{DiGraph, NodeIndex};
-use petgraph::algo::toposort;
+use petgraph::algo::{is_cyclic_directed, toposort};
 use plotters::prelude::*;
 use std::collections::HashMap;
 
-/// Generate an interval plot from a list of DAG constraints.
-/// `constraints` is a vector of (before, after) tuples.
-pub fn plot_intervals(constraints: Vec<(&str, &str)>, output_file: &str) -> Result<(), Box<dyn std::error::Error>> {
+/// Add a new constraint, validate, compute its interval, and save graph to PNG
+pub fn add_constraint_and_get_interval(
+    existing_constraints: Vec<(&str, &str)>,
+    new_constraint: (&str, &str),
+    output_file: &str,
+) -> Result<(f64, f64), Box<dyn std::error::Error>> {
     // --- Build DAG ---------------------------------------------------------
     let mut graph = DiGraph::<&str, ()>::new();
     let mut nodes: HashMap<&str, NodeIndex> = HashMap::new();
 
-    for &(a, b) in &constraints {
+    for &(a, b) in &existing_constraints {
         let a_idx = *nodes.entry(a).or_insert_with(|| graph.add_node(a));
         let b_idx = *nodes.entry(b).or_insert_with(|| graph.add_node(b));
         graph.add_edge(a_idx, b_idx, ());
     }
 
-    if !is_weakly_connected(&graph) {
-        return Err("Graph is not fully connected".into());
+    let (a, b) = new_constraint;
+    let a_idx = *nodes.entry(a).or_insert_with(|| graph.add_node(a));
+    let b_idx = *nodes.entry(b).or_insert_with(|| graph.add_node(b));
+    graph.add_edge(a_idx, b_idx, ());
+
+    // --- Validate interval graph ------------------------------------------
+    if !is_interval_graph(&graph) {
+        return Err("Adding this constraint breaks interval graph properties".into());
     }
 
     // --- Topological sort -------------------------------------------------
     let order = toposort(&graph, None).map_err(|_| "Graph has cycles")?;
 
-    // --- Earliest times ---------------------------------------------------
+    // --- Compute earliest times -------------------------------------------
     let mut earliest: HashMap<NodeIndex, f64> = HashMap::new();
     for &n in &order {
         let preds: Vec<_> = graph.neighbors_directed(n, petgraph::Incoming).collect();
-        let max_pred = preds.iter().map(|p| earliest.get(p).unwrap_or(&0.0)).cloned().fold(0.0, f64::max);
+        let max_pred = preds
+            .iter()
+            .map(|p| earliest.get(p).unwrap_or(&0.0))
+            .cloned()
+            .fold(0.0, f64::max);
         earliest.insert(n, max_pred + 1.0);
     }
 
-    // --- Latest times -----------------------------------------------------
+    // --- Compute latest times ---------------------------------------------
     let mut latest: HashMap<NodeIndex, f64> = HashMap::new();
     let max_earliest = *earliest.values().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
     for &n in order.iter().rev() {
         let succs: Vec<_> = graph.neighbors_directed(n, petgraph::Outgoing).collect();
-        let min_succ = succs.iter()
-            .map(|s| *latest.get(s).unwrap_or(&(max_earliest + 1.0)))  // dereference
+        let min_succ = succs
+            .iter()
+            .map(|s| *latest.get(s).unwrap_or(&(max_earliest + 1.0)))
             .fold(f64::INFINITY, f64::min);
-
         latest.insert(n, if min_succ.is_infinite() { max_earliest + 1.0 } else { min_succ - 1.0 });
     }
 
@@ -57,7 +70,7 @@ pub fn plot_intervals(constraints: Vec<(&str, &str)>, output_file: &str) -> Resu
         segments.insert(graph[node_idx], (start, end));
     }
 
-    // --- Plotting ---------------------------------------------------------
+    // --- Plot graph to PNG -------------------------------------------------
     let root = BitMapBackend::new(output_file, (800, (200 + 50 * segments.len()).try_into().unwrap())).into_drawing_area();
     root.fill(&WHITE)?;
 
@@ -82,21 +95,33 @@ pub fn plot_intervals(constraints: Vec<(&str, &str)>, output_file: &str) -> Resu
         )))?;
     }
 
-    Ok(())
+    // --- Return interval for new constraint --------------------------------
+    let start_new = (earliest[&a_idx] - min_e) / total_span;
+    let end_new = (latest[&b_idx] - min_e) / total_span;
+
+    Ok((start_new, end_new))
 }
 
-fn is_weakly_connected<N>(graph: &DiGraph<N, ()>) -> bool {
-    if graph.node_count() == 0 { return true; }
+/// Returns true if the graph is weakly connected and acyclic
+pub fn is_interval_graph<N>(graph: &DiGraph<N, ()>) -> bool {
+    if is_cyclic_directed(graph) {
+        return false;
+    }
+
+    if graph.node_count() == 0 {
+        return true;
+    }
 
     let mut visited = vec![false; graph.node_count()];
     let start = NodeIndex::new(0);
     let mut stack = vec![start];
 
     while let Some(node) = stack.pop() {
-        if visited[node.index()] { continue; }
+        if visited[node.index()] {
+            continue;
+        }
         visited[node.index()] = true;
 
-        // consider neighbors ignoring direction
         for neighbor in graph.neighbors(node).chain(graph.neighbors_directed(node, petgraph::Incoming)) {
             if !visited[neighbor.index()] {
                 stack.push(neighbor);
@@ -106,4 +131,3 @@ fn is_weakly_connected<N>(graph: &DiGraph<N, ()>) -> bool {
 
     visited.into_iter().all(|v| v)
 }
-
