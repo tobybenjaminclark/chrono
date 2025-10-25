@@ -80,7 +80,7 @@ function draw_map(_map, _x, _y, _r)
 	    var py = cy - p.loc.y * r;
 
 	    // --- Determine faction + sprite ---
-	    var faction = get_faction(p, global.VIEWITME);
+	    var faction = get_faction(p, global.VIEWTIME);
 	    var code    = string_lower(string_char_at(faction, 1));
 	    var spr     = get_faction_sprite(code);
 

@@ -21,12 +21,14 @@
   "ResourceOrderSettings":[
     {"name":"fnt_centaur","order":2,"path":"fonts/fnt_centaur/fnt_centaur.yy",},
     {"name":"fnt_troll","order":1,"path":"fonts/fnt_troll/fnt_troll.yy",},
+    {"name":"oTimeSlider","order":1,"path":"objects/oTimeSlider/oTimeSlider.yy",},
     {"name":"faction_font","order":2,"path":"scripts/faction_font/faction_font.yy",},
     {"name":"faction_sprite","order":1,"path":"scripts/faction_sprite/faction_sprite.yy",},
     {"name":"macros","order":1,"path":"scripts/macros/macros.yy",},
     {"name":"map_renderer","order":2,"path":"scripts/map_renderer/map_renderer.yy",},
     {"name":"road_drawer","order":1,"path":"scripts/road_drawer/road_drawer.yy",},
     {"name":"spr_centaur","order":2,"path":"sprites/spr_centaur/spr_centaur.yy",},
+    {"name":"spr_slider","order":3,"path":"sprites/spr_slider/spr_slider.yy",},
     {"name":"spr_troll","order":1,"path":"sprites/spr_troll/spr_troll.yy",},
   ],
 }
