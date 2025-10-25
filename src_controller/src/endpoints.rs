@@ -1,4 +1,7 @@
+use std::fs::File;
+use std::io::BufReader;
 use dotenvy::dotenv;
+use rand::prelude::IndexedRandom;
 use serde_json::json;
 use crate::generators::gen_names::gen_characters;
 use crate::generators::gen_places::fetch_map;
@@ -42,7 +45,7 @@ pub async fn init_map(name: String, live: bool) -> String {
             "map": map,
             "characters": characters,
             "ownership": ownership_map,
-            "events": vec!["temp".to_string()]
+            "events": generate_start_events()
         }
     });
 
@@ -53,9 +56,20 @@ pub async fn init_map(name: String, live: bool) -> String {
 
 
 pub fn generate_start_events() -> Vec<Event> {
-    // read array from start_events.json
-    // each array is a list of three Event objects
-    // pick a random one and return it
+    // Open the JSON file
+    let file = File::open("start_events.json")
+        .expect("Failed to open start_events.json");
+    let reader = BufReader::new(file);
 
-    todo!()
+    // Parse the JSON as Vec<Vec<Event>>
+    let all_event_groups: Vec<Vec<Event>> = serde_json::from_reader(reader)
+        .expect("Failed to parse start_events.json");
+
+    // Pick a random group
+    let mut rng = rand::thread_rng();
+    let chosen_group = all_event_groups
+        .choose(&mut rng)
+        .expect("No event groups found");
+
+    chosen_group.clone()
 }
