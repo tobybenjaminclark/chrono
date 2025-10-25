@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"interval",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"interval",
+  "parent":{
+    "name":"time",
+    "path":"folders/Scripts/time.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

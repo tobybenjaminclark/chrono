@@ -65,24 +65,66 @@ function draw_map(_map, _x, _y, _r)
 	                            (2*p0y - 5*p1y + 4*p2y - (cy - route[min(count - 1, j + 2)].y * r)) * t2 +
 	                            (-p0y + 3*p1y - 3*p2y + (cy - route[min(count - 1, j + 2)].y * r)) * t3);
 
-	            draw_road(prevx, prevy, qx, qy, make_color_rgb(120,120,120));
+	            draw_road(prevx, prevy, qx, qy);
 	            prevx = qx;
 	            prevy = qy;
 	        }
 	    }
 	}
 
-    // --- Draw locations (buildings) ---
-    var locs = _map.locations;
-    for (var k = 0; k < array_length(locs); k++) {
-        var p = locs[k];
-        var px = cx + p.loc.x * r;
-        var py = cy - p.loc.y * r;
+	// --- Draw locations (buildings) ---
+	var locs = _map.locations;
+	for (var k = 0; k < array_length(locs); k++) {
+	    var p  = locs[k];
+	    var px = cx + p.loc.x * r;
+	    var py = cy - p.loc.y * r;
 
-        draw_set_color(make_color_rgb(200, 220, 255));
-        draw_circle(px, py, 6, false);
+	    // --- Determine faction + sprite ---
+	    var faction = get_faction(p, global.VIEWITME);
+	    var code    = string_lower(string_char_at(faction, 1));
+	    var spr     = get_faction_sprite(code);
 
-        draw_set_color(c_white);
-        draw_text(px + 8, py - 8, p.name);
-    }
+	    // --- Draw scaled sprite ---
+	    var spr_w = sprite_get_width(spr);
+	    var spr_h = sprite_get_height(spr);
+	    var scale = 0.25;
+
+	    draw_sprite_ext(
+	        spr, 0,
+	        px, py,
+	        scale, scale,
+	        0,
+	        c_white, 1
+	    );
+
+	    // --- Text setup ---
+	    draw_set_font(get_faction_font(faction));
+	    draw_set_halign(fa_center);
+	    draw_set_valign(fa_bottom);
+
+	    var text = p.name;
+	    var text_y = py - spr_h * scale * 0.6;
+
+	    // --- Measure text for background ---
+	    var text_w = string_width(text);
+	    var text_h = string_height(text);
+	    var padding = 4; // padding around text
+
+	    var rect_x1 = px - text_w / 2 - padding;
+	    var rect_y1 = text_y - text_h - padding;
+	    var rect_x2 = px + text_w / 2 + padding;
+	    var rect_y2 = text_y + padding;
+
+	    // --- Draw background rectangle ---
+	    draw_set_color(make_color_rgb(0, 0, 0)); // black background
+	    draw_rectangle(rect_x1, rect_y1, rect_x2, rect_y2, false);
+
+	    // --- Draw text on top ---
+	    draw_set_color(c_white);
+	    draw_text(px, text_y, text);
+	}
+
+	// Reset alignment (always good practice)
+	draw_set_halign(fa_left);
+	draw_set_valign(fa_top);
 }
