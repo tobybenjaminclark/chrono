@@ -1,3 +1,4 @@
+/// Draw Event
 if (room != rm_game) exit;
 
 var t = global.VIEWTIME;
@@ -33,36 +34,38 @@ draw_set_color(c_white);
 var event_text = string(array_length(global.events)) + "x Events";
 draw_text(label_x, label_y - 30, event_text);
 
-// Determine text bounds for arrow positioning
+// --- Arrow setup ---
 var text_w = string_width(event_text);
 var text_h = string_height(event_text);
-var arrow_offset = 50; // spacing from text
-var arrow_size   = 18; // size of arrow triangle
+var arrow_offset = 50;
+var arrow_size   = 18;
 
-// --- Arrow positions ---
-var left_x  = label_x - text_w/2 - arrow_offset;
-var right_x = label_x + text_w/2 + arrow_offset;
-var arrow_y = label_y - 30 + text_h/2;
+// Arrow coordinates (still in room space)
+var left_x  = label_x - text_w / 2 - arrow_offset;
+var right_x = label_x + text_w / 2 + arrow_offset;
+var arrow_y = label_y - 30 + text_h / 2;
 
-// --- Hover detection ---
-var mx = device_mouse_x_to_gui(0);
-var my = device_mouse_y_to_gui(0);
-var hover_box = 24; // bigger hitbox
-var hover_left  = point_in_rectangle(mx, my, left_x - hover_box, arrow_y - hover_box, left_x + hover_box, arrow_y + hover_box);
-var hover_right = point_in_rectangle(mx, my, right_x - hover_box, arrow_y - hover_box, right_x + hover_box, arrow_y + hover_box);
+// --- Hover detection (room coords) ---
+var mx = mouse_x;
+var my = mouse_y;
+var hover_box = 24;
+var hover_left  = point_in_rectangle(mx, my, left_x - hover_box,  arrow_y - hover_box,
+                                             left_x + hover_box,  arrow_y + hover_box);
+var hover_right = point_in_rectangle(mx, my, right_x - hover_box, arrow_y - hover_box,
+                                             right_x + hover_box, arrow_y + hover_box);
 
 // --- Animation helper ---
 if (!variable_global_exists("arrow_timer")) global.arrow_timer = 0;
 global.arrow_timer += 0.15;
 var pulse = 0.5 + 0.5 * sin(global.arrow_timer);
 
-// --- Draw thick triangle arrows ---
+// --- Draw arrow triangles ---
 draw_set_alpha(1);
 draw_set_color(hover_left ? merge_color(c_yellow, c_white, pulse) : c_ltgray);
 draw_triangle(
-    left_x + arrow_size, arrow_y - arrow_size,
-    left_x + arrow_size, arrow_y + arrow_size,
-    left_x - arrow_size, arrow_y,
+    left_x + arrow_size,  arrow_y - arrow_size,
+    left_x + arrow_size,  arrow_y + arrow_size,
+    left_x - arrow_size,  arrow_y,
     false
 );
 
@@ -75,11 +78,11 @@ draw_triangle(
 );
 
 // --- Activate on hover ---
-var hover_speed = 0.5; // slightly faster movement
+var hover_speed = speed;
 if (hover_left)  t -= hover_speed;
 if (hover_right) t += hover_speed;
 
-// Clamp and update global time
+// Clamp and apply
 t = clamp(t, 0, 1);
 global.VIEWTIME = t;
 
