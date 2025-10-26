@@ -167,3 +167,77 @@ pub fn is_interval_graph<N>(graph: &DiGraph<N, ()>) -> bool {
 
     visited.into_iter().all(|v| v)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+    #[test]
+    fn test_add_constraint_simple() {
+        let mut events = vec![
+            Event { name: "A".to_string(), description: "".to_string(), before: vec![], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+            Event { name: "B".to_string(), description: "".to_string(), before: vec![], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+        ];
+
+        let dir = tempdir().unwrap();
+        let output_file = dir.path().join("timeline.png").to_str().unwrap().to_string();
+
+        let ((start, end), updated_events) = add_constraint_and_get_interval(
+            events.clone(),
+            ("A", "B"),
+            &output_file
+        ).unwrap();
+
+        // Check that the new constraint interval is valid
+        assert!(start < end, "Start must be less than end for new constraint");
+
+        // Check that the "before" list in event A is updated
+        let event_a = updated_events.iter().find(|e| e.name == "A").unwrap();
+        assert!(event_a.before.contains(&"B".to_string()));
+
+        // Check that start/end times are normalized between 0 and 1
+        for e in &updated_events {
+            assert!(e.start >= 0.0 && e.start <= 1.0);
+            assert!(e.end >= 0.0 && e.end <= 1.0);
+            assert!(e.start <= e.end);
+        }
+    }
+
+    #[test]
+    fn test_cycle_detection() {
+        let events = vec![
+            Event { name: "X".to_string(), description: "".to_string(), before: vec!["Y".to_string()], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+            Event { name: "Y".to_string(), description: "".to_string(), before: vec![], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+        ];
+
+        let dir = tempdir().unwrap();
+        let output_file = dir.path().join("timeline.png").to_str().unwrap().to_string();
+
+        // Adding a constraint Y -> X should create a cycle
+        let result = add_constraint_and_get_interval(events, ("Y", "X"), &output_file);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("cycle"));
+    }
+
+    #[test]
+    fn test_no_cycle_multiple_events() {
+        let mut events = vec![
+            Event { name: "A".to_string(), description: "".to_string(), before: vec!["B".to_string()], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+            Event { name: "B".to_string(), description: "".to_string(), before: vec!["C".to_string()], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+            Event { name: "C".to_string(), description: "".to_string(), before: vec![], start: 0.0, end: 0.0, _type: "".to_string(), characters: vec![], effects: vec![] },
+        ];
+
+        let dir = tempdir().unwrap();
+        let output_file = dir.path().join("timeline.png").to_str().unwrap().to_string();
+
+        // Adding a new constraint A -> C is fine
+        let result = add_constraint_and_get_interval(events.clone(), ("A", "C"), &output_file);
+        assert!(result.is_ok());
+        let (_, updated_events) = result.unwrap();
+
+        // Check that the "before" lists were updated properly
+        let a_event = updated_events.iter().find(|e| e.name == "A").unwrap();
+        assert!(a_event.before.contains(&"C".to_string()));
+    }
+}
+
