@@ -1,5 +1,5 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpStream;
 use serde_json::{json, Value};
 use crate::endpoints::init_map;
 use crate::generators::gen_events::gen_event;
@@ -7,6 +7,7 @@ use crate::types::{Character, Event};
 
 pub async fn handle_client(mut stream: TcpStream) {
     let mut buffer = [0u8; 512];
+    let mut accumulated = String::new(); // persistent string buffer
 
     loop {
         match stream.read(&mut buffer).await {
@@ -15,82 +16,96 @@ pub async fn handle_client(mut stream: TcpStream) {
                 break;
             }
             Ok(n) => {
-                println!("New message");
-                let raw_bytes = &buffer[..n];
-                let raw_str = String::from_utf8_lossy(raw_bytes);
+                let chunk = String::from_utf8_lossy(&buffer[..n]);
+                accumulated.push_str(&chunk);
 
-                if let (Some(start), Some(end)) = (raw_str.find('{'), raw_str.rfind('}')) {
-                    if start < end {
-                        let json_str = raw_str[start..=end].trim_end_matches(|c: char| !c.is_ascii_graphic());
+                // Try to extract complete JSON messages
+                loop {
+                    // Find first '{' and the matching '}'
+                    if let (Some(start), Some(end)) = (accumulated.find('{'), accumulated.rfind('}')) {
+                        if start < end {
+                            let candidate = &accumulated[start..=end];
 
-                        println!("Extracted JSON: {}", json_str);
+                            // Try to parse candidate JSON
+                            match serde_json::from_str::<Value>(candidate) {
+                                Ok(parsed_json) => {
+                                    println!("Parsed JSON: {}", parsed_json);
 
-                        match serde_json::from_str::<Value>(json_str) {
-                            Ok(parsed_json) => {
-                                println!("Parsed JSON: {}", parsed_json);
+                                    // remove parsed message from buffer
+                                    accumulated.replace_range(..=end, "");
 
-                                if let Some(init_map_obj) = parsed_json.get("INIT_MAP") {
-                                    let name = init_map_obj.get("loc_str")
-                                        .and_then(|v| v.as_str())
-                                        .unwrap_or("default");
+                                    // Handle message
+                                    if let Some(init_map_obj) = parsed_json.get("INIT_MAP") {
+                                        let name = init_map_obj
+                                            .get("loc_str")
+                                            .and_then(|v| v.as_str())
+                                            .unwrap_or("default");
 
-                                    println!("INIT_MAP requested for name: {}", name);
+                                        let response_json = init_map(name.to_string(), false).await;
 
-                                    let response_json = init_map(name.to_string(), false).await;
-
-                                    if let Err(e) = stream.write_all(response_json.as_bytes()).await {
-                                        eprintln!("Failed to send INIT_MAP response: {}", e);
-                                        break;
-                                    }
-
-                                    continue;
-                                }
-                                else if let Some(gen_events_obj) = parsed_json.get("GEN_EVENTS") {
-                                    let n = gen_events_obj.get("n")
-                                        .and_then(|v| v.as_i64())
-                                        .unwrap_or(0);
-
-                                    let events: Vec<Event> = gen_events_obj
-                                        .get("events")
-                                        .and_then(|v| serde_json::from_value(v.clone()).ok())
-                                        .unwrap_or_else(|| vec![]);
-
-                                    let characters: Vec<Character> = gen_events_obj
-                                        .get("characters")
-                                        .and_then(|v| serde_json::from_value(v.clone()).ok())
-                                        .unwrap_or_else(|| vec![]);
-
-                                    println!("GEN_EVENTS requested for: {} events", n);
-
-                                    let mut new_events = Vec::new();
-
-                                    for _ in 0..n {
-                                        let e = gen_event(events.clone(), characters.clone());
-                                        new_events.push(e);
-                                    }
-
-                                    let response = json!({
-                                        "GEN_EVENTS": {
-                                            "events": new_events,
+                                        if let Err(e) = stream.write_all(response_json.as_bytes()).await {
+                                            eprintln!("Failed to send INIT_MAP response: {}", e);
+                                            break;
                                         }
-                                    }).to_string();
 
-
-                                    if let Err(e) = stream.write_all(response.as_bytes()).await {
-                                        eprintln!("Failed to send INIT_MAP response: {}", e);
-                                        break;
+                                        continue;
                                     }
+                                    else if let Some(gen_events_obj) = parsed_json.get("GEN_EVENTS") {
+                                        let n = gen_events_obj
+                                            .get("n")
+                                            .and_then(|v| v.as_f64())
+                                            .map(|f| f as i64)
+                                            .unwrap_or(0);
 
-                                    continue;
+
+                                        let events: Vec<Event> = gen_events_obj
+                                            .get("events")
+                                            .and_then(|v| serde_json::from_value(v.clone()).ok())
+                                            .unwrap_or_else(|| vec![]);
+
+                                        let characters: Vec<Character> = gen_events_obj
+                                            .get("characters")
+                                            .and_then(|v| serde_json::from_value(v.clone()).ok())
+                                            .unwrap_or_else(|| vec![]);
+
+                                        println!("GEN_EVENTS requested for: {} events", n);
+
+                                        let mut new_events = Vec::new();
+
+                                        for _ in 0..n {
+                                            let e = gen_event(events.clone(), characters.clone()).await;
+                                            println!("Generated: {:?}", e);
+                                            new_events.push(e);
+                                        }
+
+                                        let response = json!({
+                                            "GEN_EVENTS": { "_events": new_events }
+                                        }).to_string();
+
+                                        if let Err(e) = stream.write_all(response.as_bytes()).await {
+                                            eprintln!("Failed to send GEN_EVENTS response: {}", e);
+                                            break;
+                                        }
+
+                                        continue;
+                                    }
+                                }
+                                Err(e) => {
+                                    // Incomplete JSON, wait for more data
+                                    if e.is_eof() {
+                                        break; // need more bytes, exit loop and read again
+                                    } else {
+                                        eprintln!("Failed to parse JSON: {}", e);
+                                        // Skip malformed data
+                                        accumulated.replace_range(..=end, "");
+                                    }
                                 }
                             }
-                            Err(e) => println!("Failed to parse JSON: {}, error: {}", json_str, e),
-                        }
-
-                        if let Err(e) = stream.write_all(json_str.as_bytes()).await {
-                            eprintln!("Failed to send response: {}", e);
+                        } else {
                             break;
                         }
+                    } else {
+                        break;
                     }
                 }
             }
@@ -99,18 +114,5 @@ pub async fn handle_client(mut stream: TcpStream) {
                 break;
             }
         }
-    }
-}
-
-#[tokio::main]
-async fn main() -> std::io::Result<()> {
-    let port = "9999";
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).await?;
-    println!("Server listening on localhost:{}", port);
-
-    loop {
-        let (stream, addr) = listener.accept().await?;
-        println!("New connection from {}", addr);
-        tokio::spawn(handle_client(stream));
     }
 }

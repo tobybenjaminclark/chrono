@@ -1,6 +1,6 @@
 use std::fs;
 use rand::seq::IndexedRandom;
-use crate::types::{Character, Faction};
+use crate::types::{Character};
 
 pub fn gen_characters() -> Vec<Character> {
     // Load the JSON file
@@ -14,21 +14,22 @@ pub fn gen_characters() -> Vec<Character> {
     // Filter by faction
     let gnomes: Vec<Character> = all_characters
         .iter()
-        .filter(|c| matches!(c.faction, Faction::Gnomes))
+        .filter(|c| c.faction == "g")
         .cloned()
         .collect();
 
     let trolls: Vec<Character> = all_characters
         .iter()
-        .filter(|c| matches!(c.faction, Faction::Trolls))
+        .filter(|c| c.faction == "t")
         .cloned()
         .collect();
 
     let centaurs: Vec<Character> = all_characters
         .iter()
-        .filter(|c| matches!(c.faction, Faction::Centaurs))
+        .filter(|c| c.faction == "c")
         .cloned()
         .collect();
+
 
     let mut rng = rand::thread_rng();
 
