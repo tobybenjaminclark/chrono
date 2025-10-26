@@ -89,11 +89,16 @@ pub struct Event {
     pub characters: Vec<Character>,
 
     #[serde(default)]
-    pub effects: Vec<String>,
+    pub effects: Vec<Effect>,
 }
 
 
 pub type Ownership = HashMap<Place, String>;
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum Effect {
+    Death(String),                       // Death carries a single String
+}
 
 
 #[derive(Debug, Serialize, Deserialize)]

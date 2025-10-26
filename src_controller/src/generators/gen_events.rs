@@ -5,7 +5,7 @@ use rand::prelude::IndexedRandom;
 
 use crate::interval::plot::add_constraint_and_get_interval;
 use crate::solver::solve::isPossible;
-use crate::types::{Character, Event};
+use crate::types::{Character, Effect, Event};
 use crate::utils::prompt::get_name_and_description;
 
 pub async fn gen_event(
@@ -23,16 +23,18 @@ pub async fn gen_event(
     let event_type = types.choose(&mut rng).unwrap().to_string();
 
     // Determine effects
-    let event_effects = match event_type.as_str() {
+    let event_effects: Vec<Effect> = match event_type.as_str() {
         "catastrophe" => {
-            if rng.gen_bool(0.5) {
-                vec!["death".to_string()]
+            if !existing_characters.is_empty() && rng.gen_bool(0.5) {
+                let victim = existing_characters.choose(&mut rng).unwrap().clone();
+                vec![Effect::Death(victim.name)]
             } else {
                 vec![]
             }
         }
         _ => vec![], // auxiliary events have no effects
     };
+
 
     // Pick a random existing event to be BEFORE
     if existing_events.is_empty() {
@@ -56,11 +58,19 @@ pub async fn gen_event(
 
 
     // Determine affected characters
-    let characters = if event_effects.contains(&"death".to_string()) && !existing_characters.is_empty() {
-        vec![existing_characters.choose(&mut rng).unwrap().clone()]
+    let characters: Vec<Character> = if let Some(Effect::Death(name)) = event_effects.iter().find(|e| matches!(e, Effect::Death(_))) {
+        existing_characters
+            .iter()
+            .find(|ch| &ch.name == name) // match by name
+            .cloned()                    // clone the Character struct
+            .map(|ch| vec![ch])          // wrap in a vec
+            .unwrap_or_else(Vec::new)    // fallback to empty vec if not found
     } else {
         vec![]
     };
+
+
+
 
     // Build the event
     let event = Event {
