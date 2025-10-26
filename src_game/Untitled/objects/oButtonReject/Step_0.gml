@@ -45,5 +45,6 @@ glow_timer = clamp(glow_timer, 0, 1);
 
 // --- Click detection ---
 if (hovering && mouse_check_button_pressed(mb_left)) {
+	audio_play_sound(reject_snd, 0, false, 0.5);
     if (instance_exists(ledger_parent)) ledger_parent.reject();
 }

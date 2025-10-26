@@ -16,3 +16,5 @@ if (global.server_socket < 0) {
     network_send_packet(global.client_socket, t_buffer, buffer_tell(t_buffer));
     buffer_delete(t_buffer);
 }
+
+audio_play_sound(backing, 0, true, 0.25);

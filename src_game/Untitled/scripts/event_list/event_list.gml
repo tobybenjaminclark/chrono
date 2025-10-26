@@ -63,6 +63,6 @@ function draw_active_events_list(_margin, _y)
         draw_text(x_right - 10, y_line, ev.name);
 
         draw_set_color(make_color_rgb(180, 180, 200));
-        draw_text(x_right - 20, y_line + name_h - 2, ev.description);
+        draw_text_ext(x_right - 20, y_line + name_h - 2, ev.description, 15, 400);
     }
 }

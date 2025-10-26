@@ -8,5 +8,6 @@ effects: [Death("Xyrath")] }]
 */ 
 
 function accept_ledger(){
-	
+	var ledge = global.ledgers[0];
+	init_events_from_data(ledge.events);
 }
