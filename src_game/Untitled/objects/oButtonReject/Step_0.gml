@@ -1,5 +1,11 @@
 /// STEP EVENT
 
+// --- Fade-in ---
+if (fade_alpha < 1) {
+    fade_alpha = min(fade_alpha + fade_speed, 1);
+}
+
+
 // --- Hover detection ---
 hovering = point_in_rectangle(
     mouse_x, mouse_y,

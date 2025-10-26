@@ -14,24 +14,5 @@ function get_faction(location, time)
             base_owner = global.map.ownership[$ name];
         }
     }
-
-    // --- Evolution rules over time ---
-    switch (base_owner)
-    {
-        case "g":
-            // Gnomes always stay gnomes
-            return "g";
-
-        case "t":
-            // Traders lose turf to gnomes after 0.6
-            return (t > 0.6) ? "g" : "t";
-
-        case "c":
-            // Coastal cities slowly fall to gnomes after 0.8
-            return (t > 0.8) ? "g" : "c";
-
-        default:
-            // Unknown → eventually taken by gnomes
-            return (t > 0.95) ? "g" : base_owner;
-    }
+	return base_owner;
 }

@@ -54,9 +54,15 @@ switch (state)
             {
                 state = "expanded";
                 expand_amount = 0;
+		
 
-                var accept = instance_create_layer(x + 80, y - 30, "UI", oButtonAccept);
-                var deny   = instance_create_layer(x + 80, y + 30, "UI", oButtonReject);
+			    var panel_w = 800 * 1;
+			    var panel_h = 280 * 1;
+			    var panel_x = room_width - panel_w - 40;  // slides out from envelope edge
+			    var panel_y = room_height - panel_h - 40;
+	
+                var accept = instance_create_layer(panel_x + ((panel_w / 3) * 2 ), panel_y + panel_h - 30, "UI", oButtonAccept);
+                var deny   = instance_create_layer(panel_x + ((panel_w / 3) * 1 ), panel_y + panel_h - 30, "UI", oButtonReject);
                 accept.ledger_parent = id;
                 deny.ledger_parent   = id;
             }
