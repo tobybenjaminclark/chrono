@@ -59,6 +59,7 @@
     {"name":"spr_centaur","order":2,"path":"sprites/spr_centaur/spr_centaur.yy",},
     {"name":"spr_slider","order":3,"path":"sprites/spr_slider/spr_slider.yy",},
     {"name":"spr_troll","order":1,"path":"sprites/spr_troll/spr_troll.yy",},
+    {"name":"sprBlood","order":9,"path":"sprites/sprBlood/sprBlood.yy",},
     {"name":"sprButtonCross","order":4,"path":"sprites/sprButtonCross/sprButtonCross.yy",},
     {"name":"sprButtonTick","order":5,"path":"sprites/sprButtonTick/sprButtonTick.yy",},
     {"name":"sprChronoMancer","order":1,"path":"sprites/sprChronoMancer/sprChronoMancer.yy",},
@@ -67,6 +68,7 @@
     {"name":"sprLogo","order":7,"path":"sprites/sprLogo/sprLogo.yy",},
     {"name":"sprLoser","order":6,"path":"sprites/sprLoser/sprLoser.yy",},
     {"name":"sprMenuButton","order":6,"path":"sprites/sprMenuButton/sprMenuButton.yy",},
+    {"name":"sprSkull","order":8,"path":"sprites/sprSkull/sprSkull.yy",},
     {"name":"sprWinnter","order":5,"path":"sprites/sprWinnter/sprWinnter.yy",},
   ],
 }

@@ -26,6 +26,58 @@ function draw_event_arc(cx, cy, r, start_angle, end_angle, thickness, color)
     }
 }
 
+
+/// @function get_character_status(char_name, t)
+/// @desc Returns "DEAD", "MAYBE", or "ALIVE" based on t vs any death events for the character.
+function get_character_status(char_name, t)
+{
+    if (!variable_global_exists("events") || !is_array(global.events))
+        return "ALIVE";
+
+    var evs = global.events;
+    var saw_past_death_end = false;
+
+    for (var i = 0; i < array_length(evs); i++)
+    {
+        var ev = evs[i];
+        if (!is_struct(ev) || !variable_struct_exists(ev, "effects")) continue;
+
+        // Support either {start,end} or {start_time,end_time}
+        var start_t =  undefined;
+        var end_t   =  undefined;
+        if (variable_struct_exists(ev, "start"))      start_t = ev.start;
+        if (variable_struct_exists(ev, "end"))        end_t   = ev.end;
+        if (is_undefined(start_t) && variable_struct_exists(ev, "start_time")) start_t = ev.start_time;
+        if (is_undefined(end_t)   && variable_struct_exists(ev, "end_time"))   end_t   = ev.end_time;
+        if (is_undefined(start_t) || is_undefined(end_t)) continue;
+
+        var effects = ev.effects;
+        if (!is_array(effects)) continue;
+
+        for (var j = 0; j < array_length(effects); j++)
+        {
+            var eff = effects[j];
+            if (is_struct(eff) && variable_struct_exists(eff, "Death") && eff.Death == char_name)
+            {
+                // At time t, is the death event ongoing?
+                if (t >= start_t && t <= end_t) {
+                    return "MAYBE";
+                }
+                // Otherwise remember if a death has already completed before t.
+                if (end_t < t) {
+                    saw_past_death_end = true;
+                }
+            }
+        }
+    }
+
+    return saw_past_death_end ? "DEAD" : "ALIVE";
+}
+
+
+
+
+
 /// @function draw_events_circle(_x, _y, _r_scale)
 /// @desc Draws all global.events as circular tracks around the map position.
 ///       Time runs 0–1 from 135° → 405° clockwise (over the top).

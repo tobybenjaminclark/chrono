@@ -149,6 +149,24 @@ function draw_characters_circle(_x, _y, _r, _scale)
             spr_scale, spr_scale,
             0, c_white, 1
         );
+		
+		var status = get_character_status(c.name, global.VIEWTIME);
+		if status == "DEAD" {
+		    draw_sprite_ext(
+	            sprSkull, 0,
+	            px, py,
+	            spr_scale * 0.9, spr_scale* 0.9,
+	            0, c_white, 0.85
+	        );	
+		}
+		if status == "MAYBE" {
+		    draw_sprite_ext(
+	            sprBlood, 0,
+	            px, py,
+	            spr_scale * 0.9, spr_scale* 0.9,
+	            0, c_white, 0.65
+	        );	
+		}
 
         // --- Text placement ---
         draw_set_halign(fa_center);
@@ -164,7 +182,9 @@ function draw_characters_circle(_x, _y, _r, _scale)
         if (rot > 90 && rot < 270) rot += 180;
 
         var light_col = lighten_color(col, 0.6);
-        draw_set_color(light_col);
+		
+		draw_set_color(light_col);
+        
         draw_text_transformed(text_x, text_y, c.name, text_scale, text_scale, rot);
     }
 
