@@ -1,1 +1,0 @@
-fade_to_room(rm_game);

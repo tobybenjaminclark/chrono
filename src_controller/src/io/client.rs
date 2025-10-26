@@ -36,7 +36,7 @@ pub async fn handle_client(mut stream: TcpStream) {
 
                                     println!("INIT_MAP requested for name: {}", name);
 
-                                    let response_json = init_map(name.to_string(), true).await;
+                                    let response_json = init_map(name.to_string(), false).await;
 
                                     if let Err(e) = stream.write_all(response_json.as_bytes()).await {
                                         eprintln!("Failed to send INIT_MAP response: {}", e);

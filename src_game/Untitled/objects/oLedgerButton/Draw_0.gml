@@ -1,78 +1,93 @@
+/// --- Ledger Button (Envelope) Draw ---
 
-if (visible)
+if (!visible) exit;
+
+/// --- 1. Animated glow behind envelope ---
+if (state != "expanded")
 {
-    // --- Animate glow ---
-    var glow_spin_speed   = 0.1;   // slow rotation
-    var glow_pulse_speed  = 0.05;   // pulse rate
-    var glow_pulse_amount = 0.1;    // ±10% pulse
+    var glow_spin_speed   = 0.03;
+    var glow_pulse_speed  = 0.04;
+    var glow_pulse_amount = 0.2;
 
-    appear_timer += wiggle_speed; // move timer up here (drives both animations)
+    appear_timer += wiggle_speed;
 
-    var glow_angle = appear_timer * glow_spin_speed * 180 / pi; // convert to degrees
+    var glow_angle = appear_timer * glow_spin_speed * 180 / pi;
     var glow_scale = 1 + sin(appear_timer * glow_pulse_speed * 2) * glow_pulse_amount;
 
-    // --- Fade in opacity smoothly with the envelope scale ---
-    var glow_alpha = clamp((image_xscale - 0.2) / 0.05, 0, 0.3); // 0→0.6 fade
+    // fade in with envelope scale (smooth 0 → 0.5)
+    var glow_alpha = clamp((image_xscale - 0.1) / 0.25, 0, 0.5);
 
-    // --- Draw glow behind envelope (additive blend) ---
     draw_sprite_ext(
         sprEnvelopeGlow,
         0,
         x,
         y,
-        glow_scale * 0.45, // slightly larger
-        glow_scale * 0.45,
+        glow_scale * image_xscale * 2.0,
+        glow_scale * image_yscale * 2.0,
         glow_angle,
-        make_color_rgb(255, 240, 200),
+        make_color_rgb(255, 235, 200),
         glow_alpha
     );
-
-    // --- Slide & zoom in ---
-    if (x > x_target) {
-        x = lerp(x, x_target, 0.2);
-    }
-
-    // --- Wiggle between 0.25 ↔ 0.30 ---
-    var base_scale = 0.275;
-    var range = 0.025;
-    var scale_variation = base_scale + sin(appear_timer * 2) * range;
-
-    image_xscale = scale_variation;
-    image_yscale = scale_variation;
-
-    // --- Optional small rotation wiggle ---
-    image_angle = sin(appear_timer) * wiggle_amount;
-
-    // --- Draw envelope itself last ---
-    draw_self();
+	
+	/// --- 2. Envelope sprite itself ---
+	draw_sprite_ext(sprite_index, 0, x, y, image_xscale, image_yscale, image_angle, c_white, 1);
 }
-if (visible)
-{
-    // --- Draw text to the left of the envelope ---
-    var text_offset_x = -160; // how far left of the icon
-    var text_offset_y = -10;  // vertical alignment tweak
 
-    // Title text
-    draw_set_font(fnt_title);
+
+
+
+/// --- 3. Instruction text (only when button state) ---
+if (state == "button")
+{
+    var text_off_x = -160;
+    var text_off_y = -10;
+
     draw_set_halign(fa_right);
     draw_set_valign(fa_top);
+
+    // Title
+    draw_set_font(fnt_title);
     draw_set_color(c_white);
-    draw_text(x + text_offset_x, y + text_offset_y, "You got some ledgers!");
+    draw_text(x + text_off_x, y + text_off_y, "You got some ledgers!");
 
     // Subtext
     draw_set_font(fnt_troll);
-    draw_set_halign(fa_right);
-    draw_set_valign(fa_top);
     draw_set_color(make_color_rgb(220, 220, 220));
-    draw_text(x + text_offset_x, y + text_offset_y + 40, "Click this to make some decisions");
+    draw_text(x + text_off_x, y + text_off_y + 36, "Click this to make some decisions");
 }
 
-else
+/// --- 4. Expanded panel ---
+if (state == "expanded")
 {
-    // --- Reset when hidden ---
-    x = x_start;
-    image_xscale = 0.2;
-    image_yscale = 0.2;
-    appear_timer = 0;
-    image_angle = 0;
+    var amt = expand_amount; // 0→1
+    var panel_w = 800 * amt;
+    var panel_h = 280 * amt;
+    var panel_x = room_width - panel_w - 40;  // slides out from envelope edge
+    var panel_y = room_height - panel_h - 40;
+
+    // background panel
+    draw_set_color(make_color_rgb(30, 30, 45));
+    draw_roundrect(panel_x, panel_y, panel_x + panel_w, panel_y + panel_h, false);
+
+    // draw ledger contents
+    var ldger = array_length(global.ledgers) > 0 ? global.ledgers[0] : undefined;
+    if (ldger != undefined)
+    {
+        draw_set_halign(fa_left);
+        draw_set_valign(fa_top);
+
+        // name
+        draw_set_font(fnt_title);
+        draw_set_color(c_white);
+        draw_text(panel_x + 30, panel_y + 30, ldger.name);
+
+        // description (wrapped)
+        draw_set_font(fnt_troll);
+        draw_set_color(make_color_rgb(210, 210, 210));
+        draw_text_ext(panel_x + 30, panel_y + 80, string(ldger.desc), 20, panel_w * 0.9);
+    }
+
+    // small glow accent on edge
+    draw_set_color(make_color_rgb(255, 255, 220));
+    draw_rectangle(panel_x - 4, panel_y, panel_x, panel_y + panel_h, false);
 }
