@@ -12,7 +12,7 @@ function draw_active_events_list(_margin, _y)
     var y_ = _y;
     var line_gap = 4;
     var name_h = 20;
-    var desc_h = 16;
+    var desc_h = 32;
     var block_h = name_h + desc_h + line_gap;
     var box_w = 280;
 
