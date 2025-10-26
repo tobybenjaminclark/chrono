@@ -24,6 +24,7 @@ switch (state)
         // Become available
         if (global.has_new_ledgers) {
             state = "button";
+			audio_play_sound(twinkle, 0, false, 0.5);
             visible = true;
 
             // re-init entry
@@ -52,6 +53,7 @@ switch (state)
                 x + spr_w * image_xscale * 0.5,
                 y + spr_h * image_yscale * 0.5))
             {
+				audio_play_sound(wand, 0, false, 0.5);
                 state = "expanded";
                 expand_amount = 0;
 		

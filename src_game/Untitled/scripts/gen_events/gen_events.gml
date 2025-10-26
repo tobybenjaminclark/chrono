@@ -33,10 +33,10 @@ function handle_gen_events(data)
 {
 	global.ledgers = [
         Ledger(
-			data._events[0].name,
-			data._events[0].description,
-			function(){
-		}),
-    ];
+			data._events[array_length(data._events) - 1].name,
+			data._events[array_length(data._events) - 1].description,
+			function(){},
+			data._events,
+	)];
     global.has_new_ledgers = true;
 }
