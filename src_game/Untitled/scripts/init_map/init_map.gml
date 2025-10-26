@@ -27,7 +27,7 @@ function init_events_from_data(_event_list)
     global.events = [];
 
     // --- Assign tracks automatically to avoid overlap ---
-    var add_event = function(name, desc, start_time, end_time, before, effects)
+    var add_event = function(name, desc, start_time, end_time, before, effects, characters)
     {
         var track = 0;
         var overlap = true;
@@ -55,6 +55,7 @@ function init_events_from_data(_event_list)
         ev_struct.description = desc;
 		ev_struct.before = before;
 		ev_struct.effects = effects;
+		ev_struct.characters = characters;
 
         array_push(global.events, ev_struct);
     };
@@ -72,8 +73,9 @@ function init_events_from_data(_event_list)
         var desc       = src.description;
 		var before = src.before;
 		var effects = src.effects;
+		var characters = src.characters;
 
-        add_event(name, desc, start_time, end_time, before, effects);
+        add_event(name, desc, start_time, end_time, before, effects, characters);
     }
 
     show_debug_message("[init_events_from_data] Imported " + string(array_length(global.events)) + " events!");

@@ -1,7 +1,7 @@
 /// @function Event(track, start_time, end_time, [name], [description])
 /// @desc Creates a new Event struct with track, start/end times, and metadata.
 ///       All times are normalized to [0,1].
-function Event(track, start_time, end_time, name, description, before)
+function Event(track, start_time, end_time, name, description, before, characters)
 {
     return {
         track: track,
@@ -10,6 +10,7 @@ function Event(track, start_time, end_time, name, description, before)
         name: is_undefined(name) ? "Unnamed Event" : string(name),
         description: is_undefined(description) ? "" : string(description),
 		before: is_undefined(before) ? [] : before,
+		characters: is_undefined(characters) ? [] : characters,
 		
         /// @desc Check if this event is active at a given time (0–1)
         is_active: function(time) {

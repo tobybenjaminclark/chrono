@@ -137,36 +137,6 @@ pub fn add_constraint_and_get_interval(
         }
     }
 
-
-    // --- Plot to PNG ---------------------------------------------------
-    let height = 200 + 50 * tracks.len();
-    let root = BitMapBackend::new(output_file, (800, height as u32)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let mut chart = ChartBuilder::on(&root)
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(20)
-        .build_cartesian_2d(0f64..1f64, 0f64..(tracks.len() as f64))?;
-
-    chart.configure_mesh().disable_mesh().draw()?;
-
-    for event in &existing_events {
-        let track = event.track as f64;
-        let (start, end) = segments[&event.name];
-
-        chart.draw_series(std::iter::once(Rectangle::new(
-            [(start, track), (end, track + 0.8)],
-            RGBColor(0, 100 + ((track as u8 * 30) % 155), 200).filled(),
-        )))?;
-
-        chart.draw_series(std::iter::once(Text::new(
-            event.name.clone(),
-            ((start + end) / 2.0, track + 0.4),
-            ("sans-serif", 15).into_font().color(&BLACK),
-        )))?;
-    }
-
     // --- Return interval for new constraint ---------------------------
     let start_new = (earliest[&a_idx] - min_e) / total_span;
     let end_new = (earliest[&b_idx] - min_e) / total_span; // <-- use earliest here

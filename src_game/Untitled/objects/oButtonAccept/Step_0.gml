@@ -46,6 +46,12 @@ glow_timer = clamp(glow_timer, 0, 1);
 // --- Click detection ---
 if (hovering && mouse_check_button_pressed(mb_left)) {
 	audio_play_sound(accept_snd, 0, false, 0.5);
-	accept_ledger()
+	accept_ledger();
+	
+	var ledge = global.ledgers[0];
+	if ledge.sat == false {
+		fade_to_room(rm_lose);
+	}
+	
     if (instance_exists(ledger_parent)) ledger_parent.accept();
 }

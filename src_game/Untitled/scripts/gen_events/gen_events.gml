@@ -37,6 +37,7 @@ function handle_gen_events(data)
 			data._events[array_length(data._events) - 1].description,
 			function(){},
 			data._events,
+			data.sat,
 	)];
     global.has_new_ledgers = true;
 }

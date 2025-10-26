@@ -100,6 +100,52 @@ pub fn isPossible(events: Vec<Event>, chars: Vec<Character>) -> bool {
     }
 
 
+    // Constraint 5: A character can only die once
+    let mut death_events: HashMap<String, Vec<&Int>> = HashMap::new();
+
+    for e in &events {
+        let t = event_times.get(&e.name).unwrap();
+        for eff in &e.effects {
+            if let Effect::Death(c_name) = eff {
+                death_events.entry(c_name.clone())
+                    .or_default()
+                    .push(t);
+            }
+        }
+    }
+
+    // For any two death events of the same character, enforce t1 == t2
+    for (c, times) in death_events.clone()   {
+        if times.len() > 1 {
+            for i in 0..times.len() {
+                for j in i + 1..times.len() {
+                    // They must not both be distinct deaths
+                    // Option 1: require equality (same moment of death)
+                    // solver.assert(&times[i]._eq(times[j]));
+
+                    // Option 2 (better): require distinct ordering impossible (t1 != t2)
+                    // i.e. they can't both exist in the same valid model
+                    solver.assert(&times[i]._eq(times[j]));
+                }
+            }
+        }
+    }
+
+    for (c, times) in death_events {
+        if times.len() > 1 {
+            // Pick any two death events
+            for i in 0..times.len() {
+                for j in (i + 1)..times.len() {
+                    // It's impossible for both events to "exist" for this character
+                    // because that implies two separate Death(c) effects.
+                    // Enforce: t_i != t_j is impossible if both are valid events.
+                    // So add an UNSAT disjunction.
+                    solver.assert(Bool::not(&times[i].eq(times[j]))); // <- use _ne, not _eq
+                }
+            }
+        }
+    }
+
 
     // Check satisfiability
     match solver.check() {
@@ -123,6 +169,7 @@ mod tests {
             Event {
                 name: "e1".to_string(),
                 description: "".to_string(),
+                track: 0.0,
                 before: vec!["e2".to_string()],
                 start: 0.0,
                 end: 0.0,
@@ -135,13 +182,14 @@ mod tests {
                 description: "".to_string(),
                 before: vec![],
                 start: 0.0,
+                track: 0.0,
                 end: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![Character { name: "Alice".to_string(), faction: "A".to_string() }],
                 effects: vec![],
             }
         ];
-        assert!(isPossible(events));
+        assert!(isPossible(events, vec![Character{name: "Alice".to_string(), faction: "A".to_string()}]));
     }
 
     #[test]
@@ -153,6 +201,7 @@ mod tests {
                 before: vec!["e2".to_string()],
                 start: 0.0,
                 end: 0.0,
+                track: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
                 effects: vec![Death("Bob".parse().unwrap())],
@@ -162,6 +211,7 @@ mod tests {
                 description: "".to_string(),
                 before: vec![],
                 start: 0.0,
+                track: 0.0,
                 end: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
@@ -169,7 +219,8 @@ mod tests {
             }
         ];
         // Bob dies in e1, but is in e2 -> impossible
-        assert!(!isPossible(events));
+        assert!(!isPossible(events, vec![Character{name: "Alice".to_string(), faction: "A".to_string()},
+                                         Character{name: "Bob".to_string(), faction: "B".to_string()}]));
     }
 
     #[test]
@@ -180,6 +231,7 @@ mod tests {
                 description: "".to_string(),
                 before: vec!["e2".to_string()],
                 start: 0.0,
+                track: 0.0,
                 end: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![
@@ -193,6 +245,7 @@ mod tests {
                 description: "".to_string(),
                 before: vec![],
                 start: 0.0,
+                track: 0.0,
                 end: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![
@@ -201,8 +254,47 @@ mod tests {
                 effects: vec![],
             }
         ];
-        assert!(isPossible(events));
+        assert!(isPossible(events, vec![Character{name: "Alice".to_string(), faction: "A".to_string()},
+                                         Character{name: "Bob".to_string(), faction: "B".to_string()}]));
     }
+
+    #[test]
+    fn test_double_death_same_character() {
+        let events = vec![
+            Event {
+                name: "death1".to_string(),
+                description: "Bob dies the first time".to_string(),
+                before: vec!["death2".to_string()],
+                start: 0.0,
+                end: 0.0,
+                track: 0.0,
+                _type: "catastrophe".to_string(),
+                characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
+                effects: vec![Death("Bob".to_string())],
+            },
+            Event {
+                name: "death2".to_string(),
+                description: "Bob dies again (impossible)".to_string(),
+                before: vec![],
+                start: 0.0,
+                end: 0.0,
+                track: 0.0,
+                _type: "catastrophe".to_string(),
+                characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
+                effects: vec![Death("Bob".to_string())],
+            }
+        ];
+
+        // Bob cannot die twice in a valid timeline
+        assert!(
+            !isPossible(
+                events,
+                vec![Character { name: "Bob".to_string(), faction: "B".to_string() }]
+            ),
+            "A character should not be able to die twice in sequence"
+        );
+    }
+
 
     #[test]
     fn test_chain_of_deaths() {
@@ -212,6 +304,7 @@ mod tests {
                 description: "".to_string(),
                 before: vec!["e2".to_string()],
                 start: 0.0,
+                track: 0.0,
                 end: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Alice".to_string(), faction: "A".to_string() }],
@@ -223,6 +316,7 @@ mod tests {
                 before: vec!["e3".to_string()],
                 start: 0.0,
                 end: 0.0,
+                track: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
                 effects: vec![Death("Bob".to_string())],
@@ -233,13 +327,16 @@ mod tests {
                 before: vec![],
                 start: 0.0,
                 end: 0.0,
+                track: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![Character { name: "Charlie".to_string(), faction: "C".to_string() }],
                 effects: vec![],
             }
         ];
         // No contradictions, should be possible
-        assert!(isPossible(events));
+        assert!(isPossible(events, vec![Character{name: "Alice".to_string(), faction: "A".to_string()},
+                                         Character{name: "Bob".to_string(), faction: "B".to_string()},
+                                        Character{name: "Charlie".to_string(), faction: "C".to_string()}]));
     }
 
     #[test]
@@ -251,6 +348,7 @@ mod tests {
                 before: vec!["e2".to_string()],
                 start: 0.0,
                 end: 0.0,
+                track: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![Character { name: "Alice".to_string(), faction: "A".to_string() }],
                 effects: vec![],
@@ -261,11 +359,12 @@ mod tests {
                 before: vec!["e1".to_string()], // cycle
                 start: 0.0,
                 end: 0.0,
+                track: 0.0,
                 _type: "normal".to_string(),
                 characters: vec![Character { name: "Alice".to_string(), faction: "A".to_string() }],
                 effects: vec![],
             }
         ];
-        assert!(!isPossible(events));
+        assert!(!isPossible(events, vec![Character{name: "Alice".to_string(), faction: "A".to_string()}]));
     }
 }
