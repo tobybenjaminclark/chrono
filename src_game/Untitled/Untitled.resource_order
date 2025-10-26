@@ -39,6 +39,7 @@
     {"name":"rm_lose","order":3,"path":"rooms/rm_lose/rm_lose.yy",},
     {"name":"rm_mainmenu","order":1,"path":"rooms/rm_mainmenu/rm_mainmenu.yy",},
     {"name":"rm_win","order":2,"path":"rooms/rm_win/rm_win.yy",},
+    {"name":"accept_ledger","order":1,"path":"scripts/accept_ledger/accept_ledger.yy",},
     {"name":"character_render","order":1,"path":"scripts/character_render/character_render.yy",},
     {"name":"event_list","order":2,"path":"scripts/event_list/event_list.yy",},
     {"name":"event_render","order":1,"path":"scripts/event_render/event_render.yy",},

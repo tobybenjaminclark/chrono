@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"accept_ledger",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"accept_ledger",
+  "parent":{
+    "name":"ledgers",
+    "path":"folders/Scripts/ledgers.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

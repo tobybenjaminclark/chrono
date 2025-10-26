@@ -62,6 +62,7 @@
     {"id":{"name":"rm_lose","path":"rooms/rm_lose/rm_lose.yy",},},
     {"id":{"name":"rm_mainmenu","path":"rooms/rm_mainmenu/rm_mainmenu.yy",},},
     {"id":{"name":"rm_win","path":"rooms/rm_win/rm_win.yy",},},
+    {"id":{"name":"accept_ledger","path":"scripts/accept_ledger/accept_ledger.yy",},},
     {"id":{"name":"character_render","path":"scripts/character_render/character_render.yy",},},
     {"id":{"name":"character","path":"scripts/character/character.yy",},},
     {"id":{"name":"event_list","path":"scripts/event_list/event_list.yy",},},
