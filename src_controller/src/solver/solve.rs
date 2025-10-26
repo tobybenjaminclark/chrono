@@ -2,7 +2,7 @@ use     z3::{Config, Context, Solver, ast::{Int, Bool}, SatResult};
 use crate::types::{Event, Character, Effect};
 use std::collections::HashMap;
 
-pub fn isPossible(events: Vec<Event>) -> bool {
+pub fn isPossible(events: Vec<Event>, chars: Vec<Character>) -> bool {
     let solver = Solver::new();
 
     // Map event names to Z3 integer variables
@@ -16,11 +16,7 @@ pub fn isPossible(events: Vec<Event>) -> bool {
     }
 
     // Collect all character names
-    let mut characters: Vec<String> = events.iter()
-        .flat_map(|e| e.characters.iter().map(|c| c.name.clone()))
-        .collect();
-    characters.sort();
-    characters.dedup();
+    let mut characters: Vec<String> = chars.iter().map(|c| c.name.clone()).collect();
 
     // Map each character to an array of alive booleans for times 0..1000
     let mut alive_vars: HashMap<String, Vec<Bool>> = HashMap::new();
@@ -50,7 +46,11 @@ pub fn isPossible(events: Vec<Event>) -> bool {
         let t = event_times.get(&e.name).unwrap();
         for eff in &e.effects {
             if let Effect::Death(c_name) = eff {
-                let alive_vec = alive_vars.get(c_name).unwrap();
+                let alive_vec = alive_vars.get(c_name).unwrap_or_else(|| {
+                    eprintln!("❌ No entry found for key: {c_name:?}");
+                    eprintln!("Current alive_vars keys: {:?}", alive_vars.keys());
+                    panic!("Missing key in alive_vars: {}", c_name);
+                });
                 for time in 0..=1000 {
                     let time_int = Int::from_i64(time as i64);
                     // If time >= event_time => character dead

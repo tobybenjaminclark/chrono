@@ -19,6 +19,7 @@ fn maybe_transitive_insert(
 ) -> (Vec<Event>, Vec<String>) {
     let mut before_list = vec![before_event_name.to_string()];
 
+
     if rng.gen_bool(0.75) {
         let target_b = before_event_name;
         if let Some(a_idx) = events.iter().position(|e| e.before.contains(&target_b.to_string())) {
@@ -78,6 +79,7 @@ pub async fn gen_event(
     let (updated_events_with_links, before_list) =
         maybe_transitive_insert(existing_events.clone(), &mut rng, &before_event_name);
 
+
     // --- Compute interval after adding constraint ---
     let (interval, track, updated_events) = match add_constraint_and_get_interval(
         updated_events_with_links.clone(),
@@ -125,6 +127,6 @@ pub async fn gen_event(
     let combined: Vec<Event> = updated_events.into_iter().chain(std::iter::once(event)).collect();
 
     // --- Validate ---
-    let sat = isPossible(combined.clone());
+    let sat = isPossible(combined.clone(), existing_characters);
     (sat, combined)
 }
