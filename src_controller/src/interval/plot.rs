@@ -73,12 +73,18 @@ pub fn add_constraint_and_get_interval(
     let max_earliest = *earliest.values().max_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
     for &n in order.iter().rev() {
         let succs: Vec<_> = graph.neighbors_directed(n, petgraph::Outgoing).collect();
-        let min_succ = succs
+        let min_succ_earliest = succs
             .iter()
-            .map(|s| *latest.get(s).unwrap_or(&(max_earliest + 1.0)))
+            .map(|s| *earliest.get(s).unwrap_or(&(max_earliest + 1.0)))
             .fold(f64::INFINITY, f64::min);
-        latest.insert(n, if min_succ.is_infinite() { max_earliest + 1.0 } else { min_succ - 1.0 });
+
+        latest.insert(n, if min_succ_earliest.is_infinite() {
+            max_earliest + 1.0
+        } else {
+            min_succ_earliest
+        });
     }
+
 
     // --- Normalize intervals ------------------------------------------
     let min_e = *earliest.values().min_by(|a, b| a.partial_cmp(b).unwrap()).unwrap();
@@ -103,32 +109,34 @@ pub fn add_constraint_and_get_interval(
     }
 
     // --- Assign tracks and determine new constraint track -------------
-    let mut tracks: Vec<Vec<(f64, f64)>> = Vec::new();
-    let mut new_constraint_track: f32 = 0.0;
+    let mut tracks: Vec<f64> = Vec::new(); // stores end of last event on each track
+    let mut new_constraint_track: f32 = -1.0;
 
     for event in &mut existing_events {
         let (start, end) = segments[&event.name];
         let mut assigned = false;
 
-        for (track_idx, track) in tracks.iter_mut().enumerate() {
-            if !track.iter().any(|&(s, e)| !(end <= s || start >= e)) {
-                track.push((start, end));
+        for (track_idx, last_end) in tracks.iter_mut().enumerate() {
+            if *last_end <= start {
+                // Can fit on this track
                 event.track = track_idx as f32;
+                *last_end = end;
                 assigned = true;
                 break;
             }
         }
 
         if !assigned {
-            tracks.push(vec![(start, end)]);
+            // New track needed
+            tracks.push(end);
             event.track = (tracks.len() - 1) as f32;
         }
 
-        // Update track for the new constraint
         if event.name == a || event.name == b {
             new_constraint_track = new_constraint_track.max(event.track);
         }
     }
+
 
     // --- Plot to PNG ---------------------------------------------------
     let height = 200 + 50 * tracks.len();
@@ -161,7 +169,8 @@ pub fn add_constraint_and_get_interval(
 
     // --- Return interval for new constraint ---------------------------
     let start_new = (earliest[&a_idx] - min_e) / total_span;
-    let end_new = (latest[&b_idx] - min_e) / total_span;
+    let end_new = (earliest[&b_idx] - min_e) / total_span; // <-- use earliest here
+
 
     Ok(((start_new, end_new), new_constraint_track as i32, existing_events))
 }
