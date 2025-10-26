@@ -90,6 +90,9 @@ pub struct Event {
 
     #[serde(default)]
     pub effects: Vec<Effect>,
+
+    #[serde(default)]
+    pub track: f32,
 }
 
 
