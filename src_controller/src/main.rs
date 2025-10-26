@@ -15,17 +15,6 @@ use crate::io::client::handle_client;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let constraints = vec![
-        ("A", "C"),
-        ("A", "D"),
-        ("B", "C"),
-        ("B", "D"),
-    ];
-
-
-    add_constraint_and_get_interval(constraints, ("C", "D"), "intervals.png")?;
-
-
     init_connection().await;
     Ok(())
 }

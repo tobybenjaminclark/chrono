@@ -1,4 +1,4 @@
-use crate::types::Event;
+use crate::types::{Effect, Event};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use dotenvy::dotenv;
@@ -48,10 +48,11 @@ pub async fn get_name_and_description(mut event: Event) -> Result<Event, Box<dyn
         event._type, before, characters
     );
 
-    if event.effects.iter().any(|e| e.to_lowercase() == "death") && !event.characters.is_empty() {
+    if event.effects.iter().any(|e| matches!(e, Effect::Death(_))) && !event.characters.is_empty() {
         let character_name = &event.characters[0].name; // Pick the first character affected
         prompt.push_str(&format!(" The {} should cause {} to die.", event._type, character_name));
     }
+
 
     prompt.push_str(" Write the description as a request from a member of the kingdom to the player, in a concise, fun, medieval tone (1–2 sentences). Return the result as JSON in the format {\"name\": ..., \"description\": ... }.");
 

@@ -1,5 +1,5 @@
 use     z3::{Config, Context, Solver, ast::{Int, Bool}, SatResult};
-use crate::types::{Event, Character};
+use crate::types::{Event, Character, Effect};
 use std::collections::HashMap;
 
 pub fn isPossible(events: Vec<Event>) -> bool {
@@ -48,9 +48,8 @@ pub fn isPossible(events: Vec<Event>) -> bool {
     // Constraint 2: Death effects
     for e in &events {
         let t = event_times.get(&e.name).unwrap();
-        for (i, eff) in e.effects.iter().enumerate() {
-            if eff == "death" {
-                let c_name = &e.characters[i].name;
+        for eff in &e.effects {
+            if let Effect::Death(c_name) = eff {
                 let alive_vec = alive_vars.get(c_name).unwrap();
                 for time in 0..=1000 {
                     let time_int = Int::from_i64(time as i64);
@@ -58,7 +57,6 @@ pub fn isPossible(events: Vec<Event>) -> bool {
                     solver.assert(&time_int.ge(t).implies(&alive_vec[time].not()));
                 }
             }
-
         }
     }
 
@@ -84,7 +82,8 @@ pub fn isPossible(events: Vec<Event>) -> bool {
             let alive_vec = alive_vars.get(&c.name).unwrap();
 
             // find whether this event kills this character
-            let is_death = e.effects.get(i).map(|s| s == "death").unwrap_or(false);
+            let is_death = e.effects.get(i).map(|eff| matches!(eff, Effect::Death(_))).unwrap_or(false);
+
 
             for time in 0..=1000 {
                 let time_int = Int::from_i64(time as i64);
@@ -116,6 +115,7 @@ pub fn isPossible(events: Vec<Event>) -> bool {
 mod tests {
     use super::*;
     use crate::types::{Event, Character};
+    use crate::types::Effect::Death;
 
     #[test]
     fn test_simple_sequence() {
@@ -155,7 +155,7 @@ mod tests {
                 end: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
-                effects: vec!["death".to_string()],
+                effects: vec![Death("Bob".parse().unwrap())],
             },
             Event {
                 name: "e2".to_string(),
@@ -215,7 +215,7 @@ mod tests {
                 end: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Alice".to_string(), faction: "A".to_string() }],
-                effects: vec!["death".to_string()],
+                effects: vec![Death("Alice".to_string())],
             },
             Event {
                 name: "e2".to_string(),
@@ -225,7 +225,7 @@ mod tests {
                 end: 0.0,
                 _type: "combat".to_string(),
                 characters: vec![Character { name: "Bob".to_string(), faction: "B".to_string() }],
-                effects: vec!["death".to_string()],
+                effects: vec![Death("Bob".to_string())],
             },
             Event {
                 name: "e3".to_string(),
