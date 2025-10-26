@@ -66,6 +66,7 @@
     {"id":{"name":"event","path":"scripts/event/event.yy",},},
     {"id":{"name":"faction_font","path":"scripts/faction_font/faction_font.yy",},},
     {"id":{"name":"faction_sprite","path":"scripts/faction_sprite/faction_sprite.yy",},},
+    {"id":{"name":"gen_events","path":"scripts/gen_events/gen_events.yy",},},
     {"id":{"name":"init_map","path":"scripts/init_map/init_map.yy",},},
     {"id":{"name":"interval","path":"scripts/interval/interval.yy",},},
     {"id":{"name":"ledger","path":"scripts/ledger/ledger.yy",},},
