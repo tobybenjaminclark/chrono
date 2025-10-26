@@ -63,7 +63,7 @@ pub async fn gen_event(
     existing_characters: Vec<Character>,
 ) -> (bool, Vec<Event>) {
     let mut rng = StdRng::from_rng(&mut rand::thread_rng());
-    let types = vec!["auxiliary", "catastrophe", "ceremony", "catastrophe", "miracle", "catastrophe", "catastrophe", "catastrophe", "catastrophe", "catastrophe", "catastrophe", "catastrophe"];
+    let types = vec!["auxiliary", "catastrophe", "ceremony", "catastrophe", "miracle", "catastrophe", "catastrophe","catastrophe"];
     let event_type = types.choose(&mut rng).unwrap().to_string();
 
     // Possible effects

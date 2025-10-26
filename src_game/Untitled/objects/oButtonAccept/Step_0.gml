@@ -51,6 +51,10 @@ if (hovering && mouse_check_button_pressed(mb_left)) {
 	var ledge = global.ledgers[0];
 	if ledge.sat == false {
 		fade_to_room(rm_lose);
+		audio_play_sound(sad, 1, false, 0.7);
+	} else if (array_length(global.events) >= 15) {
+		audio_play_sound(fanfare, 1, false, 0.7);
+		fade_to_room(rm_win);
 	}
 	
     if (instance_exists(ledger_parent)) ledger_parent.accept();

@@ -77,3 +77,18 @@ switch (state)
         expand_amount = lerp(expand_amount, 1, 0.1);
         break;
 }
+
+// --- Handle cooldown timer for next ledger fetch ---
+// --- Cooldown before next ledger request ---
+if (!fetch_ready) {
+    fetch_cooldown_timer += 1;
+
+    if (fetch_cooldown_timer >= fetch_cooldown_max) {
+        fetch_ready = true;
+        fetch_cooldown_timer = 0;
+
+        // --- Trigger new ledger generation ---
+        show_debug_message("[Ledger] Requesting next ledger...");
+        gen_events(1); // 🟢 Call your global function directly here
+    }
+}

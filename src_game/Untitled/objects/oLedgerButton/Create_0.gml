@@ -62,6 +62,10 @@ function accept() {
     // buttons clean-up
     with (oButtonAccept) if (ledger_parent == other.id) instance_destroy();
     with (oButtonReject) if (ledger_parent == other.id) instance_destroy();
+    // --- start cooldown ---
+    fetch_ready = false;
+    fetch_cooldown_timer = 0;
+    global.can_request_next_ledger = false;
 }
 
 function reject() {
@@ -74,4 +78,15 @@ function reject() {
     target_x = off_x; // slide away
     with (oButtonAccept) if (ledger_parent == other.id) instance_destroy();
     with (oButtonReject) if (ledger_parent == other.id) instance_destroy();
+    // --- start cooldown ---
+    fetch_ready = false;
+    fetch_cooldown_timer = 0;
+    global.can_request_next_ledger = false;
 }
+
+// --- Next ledger request timing ---
+fetch_cooldown_timer = 0;
+fetch_cooldown_max   = 5 * room_speed; // 5-second cooldown
+fetch_ready           = true;          // can new ledger be requested?
+
+alarm[0] = 3 * room_speed;  // 2-second delay
