@@ -1,5 +1,5 @@
 use std::cmp::PartialEq;
-use crate::types::{Event, Faction, Map, Ownership, Place};
+use crate::types::{Event, Map, Ownership, Place};
 use std::collections::HashMap;
 use rand::prelude::IndexedRandom;
 
@@ -10,7 +10,7 @@ fn dist2(a: (f64, f64), b: (f64, f64)) -> f64 {
     dx * dx + dy * dy
 }
 pub fn cluster_locations(map: &Map) -> Ownership {
-    let factions = [Faction::Gnomes, Faction::Trolls, Faction::Centaurs];
+    let factions = ["g", "t", "c"];
     let k = factions.len();
     let max_per_cluster = (map.locations.len() as f64 / k as f64).ceil() as usize;
 
@@ -21,7 +21,7 @@ pub fn cluster_locations(map: &Map) -> Ownership {
         .map(|p| p.location)
         .collect();
 
-    let mut ownership: HashMap<String, Faction> = HashMap::new();
+    let mut ownership: HashMap<String, String> = HashMap::new();
     let mut changed = true;
     let mut iterations = 0;
     let max_iterations = 100;
@@ -67,8 +67,8 @@ pub fn cluster_locations(map: &Map) -> Ownership {
         for (i, cluster) in clusters.iter().enumerate() {
             for &name in cluster {
                 let faction = factions[i];
-                if ownership.get(name) != Some(&faction) {
-                    ownership.insert(name.to_string(), faction);
+                if ownership.get(name) != Some(&faction.to_string()) {
+                    ownership.insert(name.to_string(), faction.to_string());
                     changed = true;
                 }
             }
@@ -79,7 +79,7 @@ pub fn cluster_locations(map: &Map) -> Ownership {
     let mut final_ownership = HashMap::new();
     for place in &map.locations {
         if let Some(faction) = ownership.get(&place.name) {
-            final_ownership.insert(place.clone(), *faction);
+            final_ownership.insert(place.clone(), faction.clone());
         }
     }
     final_ownership

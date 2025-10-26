@@ -41,7 +41,7 @@ pub async fn handle_client(mut stream: TcpStream) {
                                             .and_then(|v| v.as_str())
                                             .unwrap_or("default");
 
-                                        let response_json = init_map(name.to_string(), true).await;
+                                        let response_json = init_map(name.to_string(), false).await;
 
                                         if let Err(e) = stream.write_all(response_json.as_bytes()).await {
                                             eprintln!("Failed to send INIT_MAP response: {}", e);
@@ -73,7 +73,8 @@ pub async fn handle_client(mut stream: TcpStream) {
                                         let mut new_events = Vec::new();
 
                                         for _ in 0..n {
-                                            let e = gen_event(events.clone(), characters.clone());
+                                            let e = gen_event(events.clone(), characters.clone()).await;
+                                            println!("Generated: {:?}", e);
                                             new_events.push(e);
                                         }
 

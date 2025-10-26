@@ -1,7 +1,7 @@
 use plotters::prelude::*;
 use std::error::Error;
 use std::f64::consts::PI;
-use crate::types::{Map, Event, Faction, Ownership};
+use crate::types::{Map, Event, Ownership};
 
 pub fn viz_map(map: &Map, ownership: &Ownership) -> Result<(), Box<dyn Error>> {
     // Create drawing area
@@ -30,10 +30,11 @@ pub fn viz_map(map: &Map, ownership: &Ownership) -> Result<(), Box<dyn Error>> {
     }
 
     // Helper to get color by faction
-    let faction_color = |f: &Faction| match f {
-        Faction::Gnomes => &GREEN,
-        Faction::Trolls => &RED,
-        Faction::Centaurs => &MAGENTA,
+    let faction_color = |f: &String| match f.as_str() {
+        "g" => &GREEN,
+        "t" => &RED,
+        "c" => &MAGENTA,
+        _ => panic!("Unknown faction")
     };
 
     // --- Plot locations colored by faction ---
