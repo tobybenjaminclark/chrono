@@ -6,6 +6,7 @@ mod types;
 mod endpoints;
 
 mod interval;
+mod solver;
 
 use std::error::Error;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
