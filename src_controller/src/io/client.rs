@@ -51,11 +51,6 @@ pub async fn handle_client(mut stream: TcpStream) {
                                         continue;
                                     }
                                     else if let Some(gen_events_obj) = parsed_json.get("GEN_EVENTS") {
-                                        let n = gen_events_obj
-                                            .get("n")
-                                            .and_then(|v| v.as_f64())
-                                            .map(|f| f as i64)
-                                            .unwrap_or(0);
 
 
                                         let events: Vec<Event> = gen_events_obj
@@ -70,16 +65,11 @@ pub async fn handle_client(mut stream: TcpStream) {
 
                                         println!("GEN_EVENTS requested for: {} events", n);
 
-                                        let mut new_events = Vec::new();
-
-                                        for _ in 0..n {
-                                            let e = gen_event(events.clone(), characters.clone()).await;
-                                            println!("Generated: {:?}", e);
-                                            new_events.push(e);
-                                        }
+                                            let (sat, new_events) = gen_event(events.clone(), characters.clone()).await;
+                                            println!("Generated: {:?}", new_events);
 
                                         let response = json!({
-                                            "GEN_EVENTS": { "_events": new_events }
+                                            "GEN_EVENTS": { "sat": sat, "_events": new_events }
                                         }).to_string();
 
                                         if let Err(e) = stream.write_all(response.as_bytes()).await {

@@ -4,13 +4,14 @@ use rand::SeedableRng;
 use rand::prelude::IndexedRandom;
 
 use crate::interval::plot::add_constraint_and_get_interval;
+use crate::solver::solve::isPossible;
 use crate::types::{Character, Event};
 use crate::utils::prompt::get_name_and_description;
 
 pub async fn gen_event(
     existing_events: Vec<Event>,
     existing_characters: Vec<Character>,
-) -> Event {
+) -> (bool, Vec<Event>) {
     // Send-safe RNG
     let mut rng = StdRng::from_rng(&mut rand::thread_rng());
 
@@ -40,32 +41,19 @@ pub async fn gen_event(
     let before_event = existing_events.choose(&mut rng).unwrap();
     let before_list = vec![before_event.name.clone()];
 
-    // Build constraints for all existing events
-    let constraints: Vec<(&str, &str)> = existing_events
-        .iter()
-        .flat_map(|e| {
-            e.before
-                .iter()
-                .map(|b| (e.name.as_str(), b.as_str()))
-                .collect::<Vec<_>>() // if before is empty, this will produce an empty Vec
-        })
-        .collect();
-
-    println!("Existing constraints: {:?}", constraints);
-    println!("Trying to add event before {:?}", before_event.name);
-
-    // Add constraint and get interval
-    let interval = match add_constraint_and_get_interval(
-        constraints,
+    // Add constraint and get intervals
+    let (interval, updated_events) = match add_constraint_and_get_interval(
+        existing_events.clone(), // clone to transfer ownership
         ("NEW_EVENT", &before_event.name),
         "intervals.png",
     ) {
         Ok(i) => i,
         Err(e) => {
             eprintln!("⚠️ Failed to get interval for {}: {}", before_event.name, e);
-            (0.0, 1.0)
+            ((-1.0, -1.0), vec![])
         }
     };
+
 
     // Determine affected characters
     let characters = if event_effects.contains(&"death".to_string()) && !existing_characters.is_empty() {
@@ -86,6 +74,15 @@ pub async fn gen_event(
         effects: event_effects,
     };
 
-    // Optional: prompt for name/description
-    get_name_and_description(event).await.unwrap()
+    // Prompt for name/description
+    let event = get_name_and_description(event).await.unwrap();
+
+    let combined: Vec<Event> = updated_events.into_iter().chain(std::iter::once(event)).collect();
+
+
+    if isPossible(combined.clone()) {
+        return (true, combined);
+    } else {
+        return (false, combined);
+    }
 }
