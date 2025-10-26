@@ -52,11 +52,14 @@ pub async fn handle_client(mut stream: TcpStream) {
                                     }
                                     else if let Some(gen_events_obj) = parsed_json.get("GEN_EVENTS") {
 
+                                        println!("Events: {:?}", gen_events_obj
+                                            .get("events"));
 
                                         let events: Vec<Event> = gen_events_obj
                                             .get("events")
                                             .and_then(|v| serde_json::from_value(v.clone()).ok())
                                             .unwrap_or_else(|| vec![]);
+
 
                                         let characters: Vec<Character> = gen_events_obj
                                             .get("characters")

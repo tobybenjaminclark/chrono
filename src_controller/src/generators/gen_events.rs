@@ -44,7 +44,7 @@ pub async fn gen_event(
     let before_list = vec![before_event.name.clone()];
 
     // Add constraint and get intervals
-    let (interval, updated_events) = match add_constraint_and_get_interval(
+    let (interval, track, updated_events) = match add_constraint_and_get_interval(
         existing_events.clone(), // clone to transfer ownership
         ("NEW_EVENT", &before_event.name),
         "intervals.png",
@@ -52,7 +52,7 @@ pub async fn gen_event(
         Ok(i) => i,
         Err(e) => {
             eprintln!("⚠️ Failed to get interval for {}: {}", before_event.name, e);
-            ((-1.0, -1.0), vec![])
+            ((-1.0, -1.0), -1, vec![])
         }
     };
 
@@ -82,6 +82,7 @@ pub async fn gen_event(
         _type: event_type,
         characters,
         effects: event_effects,
+        track: 0.0,
     };
 
     // Prompt for name/description
