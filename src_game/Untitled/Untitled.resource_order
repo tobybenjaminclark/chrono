@@ -41,6 +41,7 @@
     {"name":"event_render","order":1,"path":"scripts/event_render/event_render.yy",},
     {"name":"faction_font","order":2,"path":"scripts/faction_font/faction_font.yy",},
     {"name":"faction_sprite","order":1,"path":"scripts/faction_sprite/faction_sprite.yy",},
+    {"name":"gen_events","order":1,"path":"scripts/gen_events/gen_events.yy",},
     {"name":"macros","order":1,"path":"scripts/macros/macros.yy",},
     {"name":"map_renderer","order":2,"path":"scripts/map_renderer/map_renderer.yy",},
     {"name":"road_drawer","order":1,"path":"scripts/road_drawer/road_drawer.yy",},

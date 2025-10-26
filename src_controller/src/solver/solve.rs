@@ -1,4 +1,4 @@
-use z3::{Config, Context, Solver, ast::{Int, Bool}, SatResult};
+use     z3::{Config, Context, Solver, ast::{Int, Bool}, SatResult};
 use crate::types::{Event, Character};
 use std::collections::HashMap;
 

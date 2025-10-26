@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"gen_events",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"gen_events",
+  "parent":{
+    "name":"networking",
+    "path":"folders/Scripts/networking.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

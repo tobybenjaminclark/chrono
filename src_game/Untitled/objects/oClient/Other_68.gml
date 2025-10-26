@@ -11,7 +11,7 @@ switch (t)
         break;
 
     case network_type_data:
-		global.is_connected = true;
+        global.is_connected = true;
         var t_buffer = ds_map_find_value(async_load, "buffer");
         var cmd_type = buffer_read(t_buffer, buffer_string);
         var jsonData = json_parse(string(cmd_type));
@@ -19,6 +19,10 @@ switch (t)
         if (variable_struct_exists(jsonData, "INIT_MAP"))
         {
             handle_init_map(jsonData.INIT_MAP);
+        }
+        if (variable_struct_exists(jsonData, "GEN_EVENTS"))
+        {
+            handle_gen_events(jsonData.GEN_EVENTS);
         }
 
         show_debug_message(jsonData);
